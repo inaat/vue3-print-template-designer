@@ -1,6 +1,6 @@
 {
   "name": "vue3-print-template-designer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vue 3 Print Template Designer with drag-and-drop functionality",
   "main": "dist/vue3-print-template-designer.umd.js",
   "module": "dist/vue3-print-template-designer.es.js",
