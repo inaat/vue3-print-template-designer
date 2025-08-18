@@ -9058,7 +9058,7 @@ function(e) {
  */
 function(e) {
   function A() {
-    return (XA.canvg ? Promise.resolve(XA.canvg) : import("./index.es-B6s7nrrN.mjs")).catch(function(t) {
+    return (XA.canvg ? Promise.resolve(XA.canvg) : import("./index.es-BB42msQB.mjs")).catch(function(t) {
       return Promise.reject(new Error("Could not load canvg: " + t));
     }).then(function(t) {
       return t.default ? t.default : t;
@@ -20261,10 +20261,16 @@ const Pd = (e) => !e || e === "inherit" ? "Arial, sans-serif" : {
       background-color: ${s.strokeColor || "#000000"};
       height: ${s.strokeWidth || 2}px;`), s.type === "rect" && (f += `
       background-color: ${s.fillColor || "#ffffff"};
-      border: ${s.strokeWidth || 1}px solid ${s.strokeColor || "#000000"};`), s.type === "circle" && (f += `
+      border: ${s.strokeWidth || 1}px ${s.strokeStyle || "solid"} ${s.strokeColor || "#000000"};
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      print-color-adjust: exact !important;`), s.type === "circle" && (f += `
       background-color: ${s.fillColor || "#ffffff"};
-      border: ${s.strokeWidth || 1}px solid ${s.strokeColor || "#000000"};
-      border-radius: 50%;`), f += `
+      border: ${s.strokeWidth || 1}px ${s.strokeStyle || "solid"} ${s.strokeColor || "#000000"};
+      border-radius: 50%;
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      print-color-adjust: exact !important;`), f += `
     }`, f;
   }).join(`
 `), n = A.map((s) => {
@@ -20350,9 +20356,16 @@ const Pd = (e) => !e || e === "inherit" ? "Arial, sans-serif" : {
     "        }",
     "        ",
     "        @media print {",
+    "            * {",
+    "                -webkit-print-color-adjust: exact !important;",
+    "                color-adjust: exact !important;",
+    "                print-color-adjust: exact !important;",
+    "            }",
+    "            ",
     "            body {",
     "                background: white;",
     "                padding: 0;",
+    "                margin: 0;",
     "            }",
     "            ",
     "            .template-container {",
@@ -20360,6 +20373,13 @@ const Pd = (e) => !e || e === "inherit" ? "Arial, sans-serif" : {
     "                height: 100% !important;",
     "                box-shadow: none !important;",
     "                margin: 0 !important;",
+    "            }",
+    "            ",
+    "            /* Ensure borders and backgrounds are printed */",
+    '            [class*="element-"] {',
+    "                -webkit-print-color-adjust: exact !important;",
+    "                color-adjust: exact !important;",
+    "                print-color-adjust: exact !important;",
     "            }",
     "        }",
     "        ",

@@ -307,3 +307,44 @@ main {
 .navbar-brand {
   font-weight: 600;
 }
+
+/* Fix for preview rectangle rendering */
+.viewer-element {
+  position: absolute !important;
+}
+
+.viewer-element .rect-element {
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.viewer-element .line-element {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+.viewer-element .circle-element {
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure all preview elements maintain their dimensions */
+.ptd-viewer .viewer-element {
+  display: block !important;
+}
+
+.ptd-viewer .rect-element,
+.ptd-viewer .circle-element {
+  border-style: solid !important;
+  border-width: 1px !important;
+}
+
+/* Fix for any collapsed elements in preview */
+.viewer-canvas .viewer-element[style*="height: 0"],
+.viewer-canvas .viewer-element[style*="width: 0"] {
+  min-height: 2px !important;
+  min-width: 2px !important;
+}

@@ -67,14 +67,20 @@ export const generateHTMLContent = (template) => {
     if (element.type === 'rect') {
       styles += `
       background-color: ${element.fillColor || '#ffffff'};
-      border: ${element.strokeWidth || 1}px solid ${element.strokeColor || '#000000'};`
+      border: ${element.strokeWidth || 1}px ${element.strokeStyle || 'solid'} ${element.strokeColor || '#000000'};
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      print-color-adjust: exact !important;`
     }
     
     if (element.type === 'circle') {
       styles += `
       background-color: ${element.fillColor || '#ffffff'};
-      border: ${element.strokeWidth || 1}px solid ${element.strokeColor || '#000000'};
-      border-radius: 50%;`
+      border: ${element.strokeWidth || 1}px ${element.strokeStyle || 'solid'} ${element.strokeColor || '#000000'};
+      border-radius: 50%;
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      print-color-adjust: exact !important;`
     }
     
     styles += `
@@ -199,9 +205,16 @@ export const generateHTMLContent = (template) => {
     '        }',
     '        ',
     '        @media print {',
+    '            * {',
+    '                -webkit-print-color-adjust: exact !important;',
+    '                color-adjust: exact !important;',
+    '                print-color-adjust: exact !important;',
+    '            }',
+    '            ',
     '            body {',
     '                background: white;',
     '                padding: 0;',
+    '                margin: 0;',
     '            }',
     '            ',
     '            .template-container {',
@@ -209,6 +222,13 @@ export const generateHTMLContent = (template) => {
     '                height: 100% !important;',
     '                box-shadow: none !important;',
     '                margin: 0 !important;',
+    '            }',
+    '            ',
+    '            /* Ensure borders and backgrounds are printed */',
+    '            [class*="element-"] {',
+    '                -webkit-print-color-adjust: exact !important;',
+    '                color-adjust: exact !important;',
+    '                print-color-adjust: exact !important;',
     '            }',
     '        }',
     '        ',

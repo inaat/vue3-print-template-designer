@@ -87,19 +87,91 @@
       
       <ptd-viewer
         v-else-if="currentView === 'viewer'"
-        :template="currentTemplate"
+        :template="viewerTemplate"
       />
     </main>
+
+    <!-- Save Template Modal -->
+    <div class="modal fade" id="saveTemplateModal" tabindex="-1" aria-labelledby="saveTemplateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="saveTemplateModalLabel">
+              <i class="bi bi-floppy me-2"></i>Save Template
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="confirmSaveTemplate">
+              <div class="mb-3">
+                <label for="templateName" class="form-label">Template Name</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="templateName" 
+                  v-model="saveModalData.name"
+                  :placeholder="`Template ${templates.length + 1}`"
+                  required
+                >
+              </div>
+              <div class="mb-3">
+                <label for="templateDescription" class="form-label">Description (Optional)</label>
+                <textarea 
+                  class="form-control" 
+                  id="templateDescription" 
+                  v-model="saveModalData.description"
+                  rows="3"
+                  placeholder="Enter a description for this template..."
+                ></textarea>
+              </div>
+              <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>{{ saveModalData.elementCount }}</strong> elements will be saved in this template.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-primary" @click="confirmSaveTemplate">
+              <i class="bi bi-floppy me-1"></i>Save Template
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="saveSuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <i class="bi bi-check-circle-fill text-success me-2"></i>
+          <strong class="me-auto">Success</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {{ saveSuccessMessage }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { PtdDesigner, PtdViewer, useTemplateManager, generateHTMLContent, downloadHTML } from 'vue3-print-template-designer'
+import { ref, onMounted, computed } from 'vue'
+import { PtdDesigner, PtdViewer, generateHTMLContent, downloadHTML } from 'vue3-print-template-designer'
 
 const designerRef = ref(null)
 const currentView = ref('designer')
 const currentTemplate = ref(null)
+const saveModalData = ref({
+  name: '',
+  description: '',
+  elementCount: 0,
+  template: null
+})
+const saveSuccessMessage = ref('')
 const templateToLoad = ref({
   elements: [
    
@@ -140,16 +212,74 @@ const templateToLoad = ref({
     pageSize: 'a4'
 })
 
-const {
-  templates,
-  saveTemplate,
-  loadTemplate,
-  deleteTemplate: deleteTemplateById,
-  initializeTemplates
-} = useTemplateManager()
+// Custom template management (no useTemplateManager)
+const templates = ref([])
+
+// Custom functions for template management
+const loadCustomTemplates = () => {
+  try {
+    const saved = localStorage.getItem('custom_templates')
+    if (saved) {
+      templates.value = JSON.parse(saved)
+    }
+  } catch (error) {
+    console.warn('Failed to load custom templates:', error)
+    templates.value = []
+  }
+}
+
+const deleteCustomTemplate = (templateId) => {
+  const index = templates.value.findIndex(t => t.id === templateId)
+  if (index > -1) {
+    templates.value.splice(index, 1)
+    localStorage.setItem('custom_templates', JSON.stringify(templates.value))
+    return true
+  }
+  return false
+}
+
+const loadCustomTemplate = (templateId) => {
+  const template = templates.value.find(t => t.id === templateId)
+  if (template) {
+    currentTemplate.value = template
+    return template.template
+  }
+  return null
+}
+
+// Computed property to get the template data for viewer
+const viewerTemplate = computed(() => {
+  if (currentTemplate.value?.template) {
+    const template = currentTemplate.value.template
+    console.log('Viewer template data:', template)
+    
+    // Debug rectangle elements
+    if (template.elements) {
+      template.elements.forEach((element, index) => {
+        if (element.type === 'rect') {
+          console.log(`Rectangle ${index}:`, {
+            x: element.x,
+            y: element.y, 
+            width: element.width,
+            height: element.height,
+            fillColor: element.fillColor,
+            strokeColor: element.strokeColor,
+            strokeWidth: element.strokeWidth
+          })
+        }
+      })
+    }
+    
+    return template
+  } else if (currentTemplate.value) {
+    console.log('Direct template data:', currentTemplate.value)
+    return currentTemplate.value
+  }
+  return null
+})
 
 onMounted(() => {
-  initializeTemplates()
+  loadCustomTemplates()
 })
 
 const setView = (view) => {
@@ -157,7 +287,13 @@ const setView = (view) => {
 }
 
 const handleTemplateUpdate = (template) => {
-  currentTemplate.value = template
+  console.log('Template updated:', template)
+  currentTemplate.value = {
+    id: currentTemplate.value?.id || Date.now().toString(),
+    name: currentTemplate.value?.name || 'Current Template',
+    template: template,
+    updatedAt: new Date().toISOString()
+  }
 }
 
 
@@ -169,22 +305,37 @@ const saveCurrentTemplate = () => {
     console.log('Template data:', template)
     
     if (template.elements.length === 0) {
-      alert('Cannot save empty template. Add some elements first.')
+      // Show error toast instead of alert
+      showErrorToast('Cannot save empty template. Add some elements first.')
       return
     }
     
-    const name = prompt('Enter template name:', `Template ${templates.value.length + 1}`)
-    if (name && name.trim()) {
-      saveTemplate(template, name.trim())
-      alert(`Template "${name}" has been saved!`)
+    // Prepare modal data
+    saveModalData.value = {
+      name: `Template ${templates.value.length + 1}`,
+      description: '',
+      elementCount: template.elements.length,
+      template: template
     }
+    
+    // Show Bootstrap modal
+    const modalElement = document.getElementById('saveTemplateModal')
+    const modal = new bootstrap.Modal(modalElement)
+    modal.show()
+    
+    // Focus on the name input after modal is shown
+    modalElement.addEventListener('shown.bs.modal', () => {
+      document.getElementById('templateName').focus()
+      document.getElementById('templateName').select()
+    }, { once: true })
+    
   } else {
     console.log('Designer ref is null')
   }
 }
 
 const loadSavedTemplate = (templateId) => {
-  const template = loadTemplate(templateId)
+  const template = loadCustomTemplate(templateId)
   if (template) {
     // Pass the template to the designer component
     templateToLoad.value = template
@@ -211,29 +362,162 @@ const setTemplateToLoad = (template) => {
 
 const deleteTemplate = (templateId) => {
   if (confirm('Are you sure you want to delete this template?')) {
-    deleteTemplateById(templateId)
+    deleteCustomTemplate(templateId)
   }
+}
+
+const confirmSaveTemplate = () => {
+  if (saveModalData.value.name.trim()) {
+    try {
+      // Custom storage logic
+      const timestamp = new Date().toISOString()
+      const templateId = Date.now().toString()
+      
+      const savedTemplate = {
+        id: templateId,
+        name: saveModalData.value.name.trim(),
+        description: saveModalData.value.description || '',
+        template: JSON.parse(JSON.stringify(saveModalData.value.template)),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        elementCount: saveModalData.value.elementCount
+      }
+      
+      // Get existing templates from localStorage
+      let existingTemplates = []
+      try {
+        const saved = localStorage.getItem('custom_templates')
+        if (saved) {
+          existingTemplates = JSON.parse(saved)
+        }
+      } catch (error) {
+        console.warn('Error reading existing templates:', error)
+      }
+      
+      // Add new template
+      existingTemplates.push(savedTemplate)
+      
+      // Save to localStorage with custom key
+      localStorage.setItem('custom_templates', JSON.stringify(existingTemplates))
+      
+      // Calculate storage usage
+      const templatesData = JSON.stringify(existingTemplates)
+      const storageUsed = new Blob([templatesData]).size
+      const storageUsedKB = (storageUsed / 1024).toFixed(2)
+      
+      // Close modal
+      const modalElement = document.getElementById('saveTemplateModal')
+      const modal = bootstrap.Modal.getInstance(modalElement)
+      modal.hide()
+      
+      // Show success toast with storage info
+      saveSuccessMessage.value = `Template "${savedTemplate.name}" saved successfully! (${storageUsedKB} KB, ${existingTemplates.length} total templates)`
+      showSuccessToast()
+      
+      console.log('Custom template saved:', {
+        template: savedTemplate,
+        totalTemplates: existingTemplates.length,
+        storageUsed: `${storageUsedKB} KB`
+      })
+      
+    } catch (error) {
+      console.warn('Failed to save template:', error)
+      showErrorToast(`Failed to save template: ${error.message}`)
+    }
+  } else {
+    showErrorToast('Please enter a template name')
+  }
+}
+
+const showSuccessToast = () => {
+  const toastElement = document.getElementById('saveSuccessToast')
+  const toast = new bootstrap.Toast(toastElement)
+  toast.show()
+}
+
+const showErrorToast = (message) => {
+  // Create error toast dynamically
+  const toastContainer = document.querySelector('.toast-container')
+  const errorToast = document.createElement('div')
+  errorToast.className = 'toast'
+  errorToast.setAttribute('role', 'alert')
+  errorToast.innerHTML = `
+    <div class="toast-header">
+      <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+      <strong class="me-auto">Error</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+    <div class="toast-body">${message}</div>
+  `
+  toastContainer.appendChild(errorToast)
+  const toast = new bootstrap.Toast(errorToast)
+  toast.show()
+  
+  // Remove toast element after it's hidden
+  errorToast.addEventListener('hidden.bs.toast', () => {
+    errorToast.remove()
+  })
 }
 
 const exportAsHTML = () => {
   console.log('Export HTML clicked')
-  if (designerRef.value) {
-    const template = designerRef.value.getTemplate()
+  
+  // Check if we have currentTemplate data
+  if (currentTemplate.value && currentTemplate.value.template) {
+    const template = currentTemplate.value.template
     console.log('Template data for HTML export:', template)
     
-    if (template.elements.length === 0) {
-      alert('Cannot export empty template. Add some elements first.')
+    if (template.elements && template.elements.length === 0) {
+      showErrorToast('Cannot export empty template. Add some elements first.')
       return
     }
     
-    const htmlContent = generateHTMLContent(template)
-    const success = downloadHTML(htmlContent)
+    try {
+      const htmlContent = generateHTMLContent(template)
+      const success = downloadHTML(htmlContent)
+      
+      if (success) {
+        saveSuccessMessage.value = 'HTML file downloaded! Open it in any browser to view and print.'
+        showSuccessToast()
+      } else {
+        showErrorToast('Failed to download HTML file.')
+      }
+    } catch (error) {
+      console.error('Error generating HTML:', error)
+      showErrorToast(`Error generating HTML: ${error.message}`)
+    }
     
-    if (success) {
-      alert('HTML file downloaded! Open it in any browser to view and print.')
+  } else if (designerRef.value) {
+    // Try to get template from designer ref if available
+    try {
+      const template = designerRef.value.getTemplate ? designerRef.value.getTemplate() : null
+      
+      if (!template) {
+        showErrorToast('Could not get template data from designer.')
+        return
+      }
+      
+      console.log('Template data for HTML export:', template)
+      
+      if (template.elements && template.elements.length === 0) {
+        showErrorToast('Cannot export empty template. Add some elements first.')
+        return
+      }
+      
+      const htmlContent = generateHTMLContent(template)
+      const success = downloadHTML(htmlContent)
+      
+      if (success) {
+        saveSuccessMessage.value = 'HTML file downloaded! Open it in any browser to view and print.'
+        showSuccessToast()
+      }
+    } catch (error) {
+      console.error('Error with designer ref:', error)
+      showErrorToast(`Error accessing designer: ${error.message}`)
     }
   } else {
-    console.log('Designer ref is null')
+    console.log('No template data available for export')
+    showErrorToast('No template data available. Please load or create a template first.')
   }
 }
 
