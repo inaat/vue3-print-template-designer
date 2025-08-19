@@ -107,10 +107,14 @@ body {
   position: relative;
   overflow: auto;
   background: #f8f9fa;
+}
+
+.canvas-container.show-grid .canvas {
   background-image: 
     linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
   background-size: 20px 20px;
+  background-color: white;
 }
 
 .canvas {
