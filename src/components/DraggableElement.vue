@@ -28,7 +28,7 @@
     <!-- Image Elements -->
     <div v-else-if="element.type === 'image'" class="image-element-container">
       <img
-        v-if="element.src"
+        v-if="element.src && !isPlaceholderContent(element.src)"
         :src="element.src"
         class="image-element"
         :style="imageStyle"
@@ -36,10 +36,19 @@
       />
       <div
         v-else
-        class="image-placeholder d-flex align-items-center justify-content-center"
+        class="image-placeholder d-flex align-items-center justify-content-center flex-column"
         :style="imageStyle"
       >
-        <i class="bi bi-image fs-1 text-muted"></i>
+        <span v-if="element.src && isPlaceholderContent(element.src)" class="text-center px-2" style="font-family: monospace;">
+          {{ element.src }}
+        </span>
+        <span v-else-if="element.placeholder" class="text-center px-2" style="font-family: monospace;">
+          {{ element.placeholder }}
+        </span>
+        <span v-else class="text-muted small text-center">
+          <i class="bi bi-image fs-2 mb-2"></i>
+          <div>No Image</div>
+        </span>
       </div>
     </div>
 
@@ -250,6 +259,10 @@ export default {
       return props.element.mergedCells[key]?.rowspan || 1
     }
 
+    const isPlaceholderContent = (content) => {
+      return content && (content.startsWith('{') && content.endsWith('}'))
+    }
+
     let isDragging = false
     let isResizing = false
     let resizeDirection = ''
@@ -360,6 +373,7 @@ export default {
       isCellHidden,
       getCellColspan,
       getCellRowspan,
+      isPlaceholderContent,
       startDrag,
       startResize
     }

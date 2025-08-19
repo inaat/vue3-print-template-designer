@@ -96,8 +96,13 @@ export const generateHTMLContent = (template) => {
     }
     
     if (element.type === 'image') {
+      const isPlaceholder = element.src && (element.src.startsWith('{') || element.src.startsWith('{{'))
+      const placeholderText = element.placeholder || element.src
+      
       return `<div class="element-${element.id}">
-        ${element.src ? `<img src="${element.src}" style="width: 100%; height: 100%; object-fit: contain;" />` : '<div style="background: #f0f0f0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #999;">Image Placeholder</div>'}
+        ${element.src && !isPlaceholder ? 
+          `<img src="${element.src}" style="width: 100%; height: 100%; object-fit: contain;" />` : 
+          `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: monospace;">${isPlaceholder ? placeholderText : '<div style="background: #f8f9fa; border: 2px dashed #dee2e6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #6c757d;">No Image</div>'}</div>`}
       </div>`
     }
     

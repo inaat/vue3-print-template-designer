@@ -573,8 +573,11 @@ const placeholders = ref([
   {
     name: '🖼️ Media Assets',
     items: [
+      { type: 'image-placeholder', content: '{employee_image}', icon: '👤', label: '{employee_image}' },
       { type: 'image-placeholder', content: '{{employee_image}}', icon: '👤', label: '{{employee_image}}' },
+      { type: 'image-placeholder', content: '{company_logo}', icon: '🏢', label: '{company_logo}' },
       { type: 'image-placeholder', content: '{{company_logo}}', icon: '🏢', label: '{{company_logo}}' },
+      { type: 'image-placeholder', content: '{signature_image}', icon: '✍️', label: '{signature_image}' },
       { type: 'image-placeholder', content: '{{signature_image}}', icon: '✍️', label: '{{signature_image}}' },
       { type: 'image', content: 'upload', icon: '📁', label: 'Upload Image' },
       { type: 'image', content: 'url', icon: '🌐', label: 'Image from URL' }

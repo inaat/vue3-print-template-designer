@@ -789,6 +789,37 @@
               </div>
             </div>
 
+            <div class="mb-3">
+              <label class="form-label">Layer Order</label>
+              <div class="btn-group w-100" role="group">
+                <button 
+                  class="btn btn-outline-secondary btn-sm"
+                  @click="sendToBack"
+                  title="Send to Back"
+                >
+                  <i class="bi bi-arrow-down-square"></i> To Back
+                </button>
+                <button 
+                  class="btn btn-outline-secondary btn-sm"
+                  @click="sendToFront"
+                  title="Send to Front"
+                >
+                  <i class="bi bi-arrow-up-square"></i> To Front
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3" v-if="selectedElement.type !== 'text'">
+              <label class="form-label">Add Label</label>
+              <button 
+                class="btn btn-outline-success btn-sm w-100"
+                @click="addLabelToElement"
+                title="Add text label on top of this element"
+              >
+                <i class="bi bi-type-bold"></i> Add Label
+              </button>
+            </div>
+
             <button 
               class="btn btn-danger btn-sm w-100" 
               @click="deleteElement"
@@ -1204,8 +1235,8 @@ watch(() => props.loadTemplate, (newTemplate) => {
           return {
             ...baseElement,
             type: 'image',
-            src: data.content && data.content.startsWith('{{') ? null : (data.src || 'https://via.placeholder.com/150x100'),
-            placeholder: data.content && data.content.startsWith('{{') ? data.content : null
+            src: data.content && (data.content.startsWith('{') || data.content.startsWith('{{')) ? data.content : (data.src || 'https://via.placeholder.com/150x100'),
+            placeholder: data.content && (data.content.startsWith('{') || data.content.startsWith('{{')) ? data.content : null
           }
 
         case 'line':
@@ -1523,6 +1554,67 @@ watch(() => props.loadTemplate, (newTemplate) => {
         delete selectedElement.value.mergedCells[key]
         updateElement()
       }
+    }
+
+    // Layer management functions
+    const sendToBack = () => {
+      if (!selectedElement.value) return
+      
+      const elementIndex = elements.value.findIndex(el => el.id === selectedElement.value.id)
+      if (elementIndex > 0) {
+        // Remove element from current position and add to beginning
+        const element = elements.value.splice(elementIndex, 1)[0]
+        elements.value.unshift(element)
+        emitTemplateUpdate()
+      }
+    }
+
+    const sendToFront = () => {
+      if (!selectedElement.value) return
+      
+      const elementIndex = elements.value.findIndex(el => el.id === selectedElement.value.id)
+      if (elementIndex < elements.value.length - 1) {
+        // Remove element from current position and add to end
+        const element = elements.value.splice(elementIndex, 1)[0]
+        elements.value.push(element)
+        emitTemplateUpdate()
+      }
+    }
+
+    // Add label to selected element
+    const addLabelToElement = () => {
+      if (!selectedElement.value) return
+      
+      const baseElement = selectedElement.value
+      
+      // Create a text label positioned at the center of the selected element
+      const labelElement = {
+        id: Date.now(),
+        type: 'text',
+        content: 'Label',
+        x: baseElement.x + (baseElement.width / 2) - 30, // Center horizontally
+        y: baseElement.y + (baseElement.height / 2) - 10, // Center vertically
+        width: 60,
+        height: 20,
+        fontSize: 14,
+        fontFamily: 'Arial',
+        color: '#000000',
+        backgroundColor: 'transparent',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        textDirection: 'ltr'
+      }
+      
+      // Add the label element
+      elements.value.push(labelElement)
+      
+      // Automatically send it to front so it appears on top
+      setTimeout(() => {
+        selectedElement.value = labelElement
+        sendToFront()
+      }, 10)
+      
+      emitTemplateUpdate()
     }
 
 // Expose methods to parent components
