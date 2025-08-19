@@ -15,14 +15,14 @@
         :height="rulerSize"
         @mousemove="handleHorizontalRulerMove"
         @mouseleave="hideVerticalGuideLine"
-        @click="addVerticalGuideLine"
+        @mousedown="startDragFromHorizontalRuler"
       ></canvas>
       
       <!-- Vertical Guide Lines -->
       <div
         v-for="line in verticalGuideLines"
         :key="`v-${line}`"
-        class="guide-line vertical-guide"
+        class="guide-line vertical-guide canvas-spanning"
         :style="{ left: `${line}px` }"
         @mousedown="startDragVerticalGuide(line, $event)"
       ></div>
@@ -50,14 +50,14 @@
         :height="canvasHeight"
         @mousemove="handleVerticalRulerMove"
         @mouseleave="hideHorizontalGuideLine"
-        @click="addHorizontalGuideLine"
+        @mousedown="startDragFromVerticalRuler"
       ></canvas>
       
       <!-- Horizontal Guide Lines -->
       <div
         v-for="line in horizontalGuideLines"
         :key="`h-${line}`"
-        class="guide-line horizontal-guide"
+        class="guide-line horizontal-guide canvas-spanning"
         :style="{ top: `${line}px` }"
         @mousedown="startDragHorizontalGuide(line, $event)"
       ></div>
@@ -225,11 +225,89 @@ export default {
       tempVerticalGuide.value = x
     }
 
+    const startDragFromHorizontalRuler = (event) => {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const startX = event.clientX - rect.left + props.scrollLeft
+      
+      isDragging.value = true
+      tempVerticalGuide.value = startX
+      
+      const handleMouseMove = (e) => {
+        const rect = horizontalRulerRef.value?.getBoundingClientRect()
+        if (!rect) return
+        
+        const newX = e.clientX - rect.left + props.scrollLeft
+        tempVerticalGuide.value = Math.max(0, Math.min(newX, props.canvasWidth))
+      }
+
+      const handleMouseUp = (e) => {
+        const rect = horizontalRulerRef.value?.getBoundingClientRect()
+        if (rect) {
+          const finalX = e.clientX - rect.left + props.scrollLeft
+          const clampedX = Math.max(0, Math.min(finalX, props.canvasWidth))
+          
+          // Only add guide if it's within canvas bounds and doesn't already exist
+          if (clampedX >= 0 && clampedX <= props.canvasWidth && !verticalGuideLines.value.includes(clampedX)) {
+            verticalGuideLines.value.push(clampedX)
+            emitGuideLines()
+          }
+        }
+        
+        isDragging.value = false
+        tempVerticalGuide.value = null
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      event.preventDefault()
+    }
+
     const handleVerticalRulerMove = (event) => {
       if (isDragging.value) return
       const rect = event.currentTarget.getBoundingClientRect()
       const y = event.clientY - rect.top + props.scrollTop
       tempHorizontalGuide.value = y
+    }
+
+    const startDragFromVerticalRuler = (event) => {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const startY = event.clientY - rect.top + props.scrollTop
+      
+      isDragging.value = true
+      tempHorizontalGuide.value = startY
+      
+      const handleMouseMove = (e) => {
+        const rect = verticalRulerRef.value?.getBoundingClientRect()
+        if (!rect) return
+        
+        const newY = e.clientY - rect.top + props.scrollTop
+        tempHorizontalGuide.value = Math.max(0, Math.min(newY, props.canvasHeight))
+      }
+
+      const handleMouseUp = (e) => {
+        const rect = verticalRulerRef.value?.getBoundingClientRect()
+        if (rect) {
+          const finalY = e.clientY - rect.top + props.scrollTop
+          const clampedY = Math.max(0, Math.min(finalY, props.canvasHeight))
+          
+          // Only add guide if it's within canvas bounds and doesn't already exist
+          if (clampedY >= 0 && clampedY <= props.canvasHeight && !horizontalGuideLines.value.includes(clampedY)) {
+            horizontalGuideLines.value.push(clampedY)
+            emitGuideLines()
+          }
+        }
+        
+        isDragging.value = false
+        tempHorizontalGuide.value = null
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      event.preventDefault()
     }
 
     const hideVerticalGuideLine = () => {
@@ -272,18 +350,44 @@ export default {
       isDragging.value = true
       dragTarget.value = { type: 'vertical', position: linePosition }
       
+      const originalIndex = verticalGuideLines.value.indexOf(linePosition)
+      
       const handleMouseMove = (e) => {
-        const rect = horizontalRulerRef.value.getBoundingClientRect()
+        const rect = horizontalRulerRef.value?.getBoundingClientRect()
+        if (!rect) return
+        
         const newX = e.clientX - rect.left + props.scrollLeft
         
-        const index = verticalGuideLines.value.indexOf(linePosition)
+        const index = verticalGuideLines.value.indexOf(dragTarget.value.position)
         if (index > -1) {
           verticalGuideLines.value[index] = newX
+          dragTarget.value.position = newX
         }
-        dragTarget.value.position = newX
       }
 
-      const handleMouseUp = () => {
+      const handleMouseUp = (e) => {
+        const rect = horizontalRulerRef.value?.getBoundingClientRect()
+        if (rect) {
+          const finalX = e.clientX - rect.left + props.scrollLeft
+          const rulerRect = horizontalRulerRef.value.getBoundingClientRect()
+          const mouseY = e.clientY
+          
+          // Check if dragged back to ruler (within ruler bounds)
+          if (mouseY >= rulerRect.top && mouseY <= rulerRect.bottom) {
+            // Remove the guide
+            const index = verticalGuideLines.value.indexOf(dragTarget.value.position)
+            if (index > -1) {
+              verticalGuideLines.value.splice(index, 1)
+            }
+          } else if (finalX < 0 || finalX > props.canvasWidth) {
+            // Remove if dragged outside canvas bounds
+            const index = verticalGuideLines.value.indexOf(dragTarget.value.position)
+            if (index > -1) {
+              verticalGuideLines.value.splice(index, 1)
+            }
+          }
+        }
+        
         isDragging.value = false
         dragTarget.value = null
         document.removeEventListener('mousemove', handleMouseMove)
@@ -300,18 +404,44 @@ export default {
       isDragging.value = true
       dragTarget.value = { type: 'horizontal', position: linePosition }
       
+      const originalIndex = horizontalGuideLines.value.indexOf(linePosition)
+      
       const handleMouseMove = (e) => {
-        const rect = verticalRulerRef.value.getBoundingClientRect()
+        const rect = verticalRulerRef.value?.getBoundingClientRect()
+        if (!rect) return
+        
         const newY = e.clientY - rect.top + props.scrollTop
         
-        const index = horizontalGuideLines.value.indexOf(linePosition)
+        const index = horizontalGuideLines.value.indexOf(dragTarget.value.position)
         if (index > -1) {
           horizontalGuideLines.value[index] = newY
+          dragTarget.value.position = newY
         }
-        dragTarget.value.position = newY
       }
 
-      const handleMouseUp = () => {
+      const handleMouseUp = (e) => {
+        const rect = verticalRulerRef.value?.getBoundingClientRect()
+        if (rect) {
+          const finalY = e.clientY - rect.top + props.scrollTop
+          const rulerRect = verticalRulerRef.value.getBoundingClientRect()
+          const mouseX = e.clientX
+          
+          // Check if dragged back to ruler (within ruler bounds)
+          if (mouseX >= rulerRect.left && mouseX <= rulerRect.right) {
+            // Remove the guide
+            const index = horizontalGuideLines.value.indexOf(dragTarget.value.position)
+            if (index > -1) {
+              horizontalGuideLines.value.splice(index, 1)
+            }
+          } else if (finalY < 0 || finalY > props.canvasHeight) {
+            // Remove if dragged outside canvas bounds
+            const index = horizontalGuideLines.value.indexOf(dragTarget.value.position)
+            if (index > -1) {
+              horizontalGuideLines.value.splice(index, 1)
+            }
+          }
+        }
+        
         isDragging.value = false
         dragTarget.value = null
         document.removeEventListener('mousemove', handleMouseMove)
@@ -364,8 +494,8 @@ export default {
       handleVerticalRulerMove,
       hideVerticalGuideLine,
       hideHorizontalGuideLine,
-      addVerticalGuideLine,
-      addHorizontalGuideLine,
+      startDragFromHorizontalRuler,
+      startDragFromVerticalRuler,
       startDragVerticalGuide,
       startDragHorizontalGuide,
       clearAllGuides
@@ -423,36 +553,92 @@ export default {
   position: absolute;
   pointer-events: all;
   z-index: 1001;
+  transition: all 0.15s ease;
 }
 
 .vertical-guide {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #007bff;
+  background: #00d4ff;
   cursor: ew-resize;
+  box-shadow: 0 0 1px rgba(0, 212, 255, 0.6);
+}
+
+.vertical-guide.canvas-spanning {
+  top: 0;
+  height: 100vh;
+  width: 3px;
+  background: linear-gradient(to right, transparent, #00d4ff, transparent);
+  box-shadow: 0 0 2px rgba(0, 212, 255, 0.8);
 }
 
 .horizontal-guide {
   left: 0;
   right: 0;
   height: 1px;
-  background: #007bff;
+  background: #00d4ff;
   cursor: ns-resize;
+  box-shadow: 0 0 1px rgba(0, 212, 255, 0.6);
+}
+
+.horizontal-guide.canvas-spanning {
+  left: 0;
+  width: 100vw;
+  height: 3px;
+  background: linear-gradient(to bottom, transparent, #00d4ff, transparent);
+  box-shadow: 0 0 2px rgba(0, 212, 255, 0.8);
 }
 
 .guide-line.temp {
-  background: rgba(0, 123, 255, 0.5);
+  background: rgba(0, 212, 255, 0.7);
   pointer-events: none;
+  animation: pulse 1.5s ease-in-out infinite alternate;
 }
 
 .guide-line:hover {
-  background: #0056b3;
-  box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
+  background: #ff4081;
+  box-shadow: 0 0 3px rgba(255, 64, 129, 0.8);
+  transform: scale(1.5);
 }
 
+.guide-line.canvas-spanning:hover {
+  background: #ff4081 !important;
+  box-shadow: 0 0 4px rgba(255, 64, 129, 0.9) !important;
+  transform: scale(1.2);
+}
+
+.vertical-guide.canvas-spanning:hover {
+  background: linear-gradient(to right, transparent, #ff4081, transparent) !important;
+}
+
+.horizontal-guide.canvas-spanning:hover {
+  background: linear-gradient(to bottom, transparent, #ff4081, transparent) !important;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Make rulers more interactive */
 canvas {
   display: block;
   cursor: crosshair;
+  transition: background-color 0.2s ease;
+}
+
+.horizontal-ruler canvas:hover {
+  cursor: crosshair;
+  background-color: rgba(0, 212, 255, 0.1);
+}
+
+.vertical-ruler canvas:hover {
+  cursor: crosshair;
+  background-color: rgba(0, 212, 255, 0.1);
 }
 </style>

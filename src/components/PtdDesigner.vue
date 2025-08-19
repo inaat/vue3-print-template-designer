@@ -50,7 +50,7 @@
             </button>
           </div>
           
-          <div class="form-check">
+          <div class="form-check me-3">
             <input 
               class="form-check-input" 
               type="checkbox" 
@@ -59,6 +59,18 @@
             >
             <label class="form-check-label" for="gridToggle">
               Grid
+            </label>
+          </div>
+          
+          <div class="form-check">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="rulersToggle"
+              v-model="showRulers"
+            >
+            <label class="form-check-label" for="rulersToggle">
+              Rulers
             </label>
           </div>
           
@@ -835,10 +847,25 @@
         </div>
       </div>
 
-      <div class="canvas-container" :class="{ 'show-grid': showGrid }">
+      <div class="canvas-container" :class="{ 'show-grid': showGrid }" ref="canvasContainer">
+        <!-- Ruler Component -->
+        <sketch-ruler
+          v-if="showRulers"
+          :canvas-width="pageSize === 'a4' ? 794 : 816"
+          :canvas-height="pageSize === 'a4' ? 1123 : 1056"
+          :zoom="zoom"
+          :scroll-left="0"
+          :scroll-top="0"
+          @guide-lines-changed="handleGuideLinesChanged"
+        />
+        
+        <!-- Guide Lines are now handled by SketchRuler component -->
+        
         <!-- Debug info -->
         <div class="debug-info">
           <div>Elements: {{ elements.length }}</div>
+          <div>Vertical Guides: {{ guideLines.vertical.length }}</div>
+          <div>Horizontal Guides: {{ guideLines.horizontal.length }}</div>
           <div v-if="elements.length > 0">
             Last element: {{ elements[elements.length - 1]?.type }} at ({{ elements[elements.length - 1]?.x }}, {{ elements[elements.length - 1]?.y }})
           </div>
@@ -877,6 +904,7 @@
 import { ref, watch } from 'vue'
 import DraggableElement from './DraggableElement.vue'
 import DataSourcePanel from './DataSourcePanel.vue'
+import SketchRuler from './SketchRuler.vue'
 
 const props = defineProps({
   placeholders: {
@@ -898,6 +926,9 @@ const showGrid = ref(true)
 const pageSize = ref('a4')
 const sidebarTab = ref('elements')
 const selectedCell = ref(null)
+const showRulers = ref(true)
+const guideLines = ref({ vertical: [], horizontal: [] })
+const canvasContainer = ref(null)
 
 let elementIdCounter = 1
 
@@ -1617,6 +1648,137 @@ watch(() => props.loadTemplate, (newTemplate) => {
       emitTemplateUpdate()
     }
 
+    // Handle guide lines changes from ruler
+    const handleGuideLinesChanged = (newGuides) => {
+      guideLines.value = newGuides
+    }
+
+    // Snap to guides function
+    const snapToGuides = (x, y, threshold = 5) => {
+      let snappedX = x
+      let snappedY = y
+
+      // Snap to vertical guides
+      for (const guide of guideLines.value.vertical) {
+        if (Math.abs(x - guide) <= threshold) {
+          snappedX = guide
+          break
+        }
+      }
+
+      // Snap to horizontal guides
+      for (const guide of guideLines.value.horizontal) {
+        if (Math.abs(y - guide) <= threshold) {
+          snappedY = guide
+          break
+        }
+      }
+
+      return { x: snappedX, y: snappedY }
+    }
+
+    // Drag canvas vertical guide
+    const startDragCanvasVerticalGuide = (linePosition, event) => {
+      console.log('Starting vertical guide drag:', linePosition, event)
+      const isDragging = ref(true)
+      const startMouseX = event.clientX
+      const canvasRect = canvasContainer.value?.getBoundingClientRect()
+      if (!canvasRect) {
+        console.log('No canvas rect found')
+        return
+      }
+
+      const handleMouseMove = (e) => {
+        if (!isDragging.value) return
+        
+        const newX = e.clientX - canvasRect.left - 20 // Subtract ruler width
+        const clampedX = Math.max(0, Math.min(newX, (pageSize.value === 'a4' ? 794 : 816)))
+        
+        // Update the guide position
+        const index = guideLines.value.vertical.indexOf(linePosition)
+        if (index > -1) {
+          guideLines.value.vertical[index] = clampedX
+        }
+      }
+
+      const handleMouseUp = (e) => {
+        const finalX = e.clientX - canvasRect.left - 20
+        const rulerRect = { top: canvasRect.top, bottom: canvasRect.top + 20, left: canvasRect.left, right: canvasRect.right }
+        
+        // Check if dragged back to ruler area (delete guide)
+        if (e.clientY >= rulerRect.top && e.clientY <= rulerRect.bottom) {
+          const index = guideLines.value.vertical.findIndex(g => Math.abs(g - linePosition) < 5)
+          if (index > -1) {
+            guideLines.value.vertical.splice(index, 1)
+          }
+        } else if (finalX < 0 || finalX > (pageSize.value === 'a4' ? 794 : 816)) {
+          // Remove if dragged outside canvas bounds
+          const index = guideLines.value.vertical.findIndex(g => Math.abs(g - linePosition) < 5)
+          if (index > -1) {
+            guideLines.value.vertical.splice(index, 1)
+          }
+        }
+        
+        isDragging.value = false
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    // Drag canvas horizontal guide
+    const startDragCanvasHorizontalGuide = (linePosition, event) => {
+      const isDragging = ref(true)
+      const startMouseY = event.clientY
+      const canvasRect = canvasContainer.value?.getBoundingClientRect()
+      if (!canvasRect) return
+
+      const handleMouseMove = (e) => {
+        if (!isDragging.value) return
+        
+        const newY = e.clientY - canvasRect.top - 20 // Subtract ruler height
+        const clampedY = Math.max(0, Math.min(newY, (pageSize.value === 'a4' ? 1123 : 1056)))
+        
+        // Update the guide position
+        const index = guideLines.value.horizontal.indexOf(linePosition)
+        if (index > -1) {
+          guideLines.value.horizontal[index] = clampedY
+        }
+      }
+
+      const handleMouseUp = (e) => {
+        const finalY = e.clientY - canvasRect.top - 20
+        const rulerRect = { left: canvasRect.left, right: canvasRect.left + 20, top: canvasRect.top, bottom: canvasRect.bottom }
+        
+        // Check if dragged back to ruler area (delete guide)
+        if (e.clientX >= rulerRect.left && e.clientX <= rulerRect.right) {
+          const index = guideLines.value.horizontal.findIndex(g => Math.abs(g - linePosition) < 5)
+          if (index > -1) {
+            guideLines.value.horizontal.splice(index, 1)
+          }
+        } else if (finalY < 0 || finalY > (pageSize.value === 'a4' ? 1123 : 1056)) {
+          // Remove if dragged outside canvas bounds
+          const index = guideLines.value.horizontal.findIndex(g => Math.abs(g - linePosition) < 5)
+          if (index > -1) {
+            guideLines.value.horizontal.splice(index, 1)
+          }
+        }
+        
+        isDragging.value = false
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
 // Expose methods to parent components
 defineExpose({
   loadTemplate,
@@ -1661,6 +1823,67 @@ defineExpose({
 
 .table-editor .selected-cell:hover {
   background-color: #e3f2fd;
+}
+
+/* Canvas Guide Lines */
+.canvas-guide {
+  position: absolute;
+  pointer-events: all;
+  z-index: 1005;
+  transition: all 0.15s ease;
+}
+
+.canvas-guide.vertical-guide {
+  top: 20px;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to right, transparent, #00d4ff, transparent);
+  cursor: ew-resize;
+  box-shadow: 0 0 2px rgba(0, 212, 255, 0.8);
+}
+
+.canvas-guide.horizontal-guide {
+  left: 20px;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to bottom, transparent, #00d4ff, transparent);
+  cursor: ns-resize;
+  box-shadow: 0 0 2px rgba(0, 212, 255, 0.8);
+}
+
+.canvas-guide:hover {
+  background: #ff4081 !important;
+  box-shadow: 0 0 4px rgba(255, 64, 129, 0.9) !important;
+  transform: scale(1.2);
+}
+
+.canvas-guide.vertical-guide:hover {
+  background: linear-gradient(to right, transparent, #ff4081, transparent) !important;
+}
+
+.canvas-guide.horizontal-guide:hover {
+  background: linear-gradient(to bottom, transparent, #ff4081, transparent) !important;
+}
+
+/* Add a subtle hit area for easier interaction */
+.canvas-guide.vertical-guide::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+.canvas-guide.horizontal-guide::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  background: transparent;
 }
 
 </style>
