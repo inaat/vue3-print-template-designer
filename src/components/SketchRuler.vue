@@ -4,14 +4,13 @@
     <div 
       class="ruler horizontal-ruler"
       :style="{
-        width: `${canvasWidth}px`,
         left: `${rulerSize}px`,
         transform: `translateX(${-scrollLeft}px)`
       }"
     >
       <canvas
         ref="horizontalRulerRef"
-        :width="canvasWidth"
+        :width="fullContainerWidth"
         :height="rulerSize"
         @mousemove="handleHorizontalRulerMove"
         @mouseleave="hideVerticalGuideLine"
@@ -39,7 +38,6 @@
     <div 
       class="ruler vertical-ruler"
       :style="{
-        height: `${canvasHeight}px`,
         top: `${rulerSize}px`,
         transform: `translateY(${-scrollTop}px)`
       }"
@@ -47,7 +45,7 @@
       <canvas
         ref="verticalRulerRef"
         :width="rulerSize"
-        :height="canvasHeight"
+        :height="fullContainerHeight"
         @mousemove="handleVerticalRulerMove"
         @mouseleave="hideHorizontalGuideLine"
         @mousedown="startDragFromVerticalRuler"
@@ -84,18 +82,18 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick, computed } from 'vue'
 
 export default {
   name: 'SketchRuler',
   props: {
     canvasWidth: {
       type: Number,
-      default: 800
+      default: 1800
     },
     canvasHeight: {
       type: Number,
-      default: 600
+      default: 1800
     },
     zoom: {
       type: Number,
@@ -127,6 +125,15 @@ export default {
     
     const isDragging = ref(false)
     const dragTarget = ref(null)
+    
+    // Use the actual canvas dimensions passed from parent
+    const fullContainerWidth = computed(() => {
+      return props.canvasWidth || 1200
+    })
+    
+    const fullContainerHeight = computed(() => {
+      return props.canvasHeight || 800
+    })
 
     const drawHorizontalRuler = () => {
       const canvas = horizontalRulerRef.value
@@ -134,10 +141,14 @@ export default {
 
       const ctx = canvas.getContext('2d')
       const { canvasWidth, zoom } = props
+      const fullWidth = fullContainerWidth.value
       
-      ctx.clearRect(0, 0, canvasWidth, rulerSize.value)
+      // Debug logging
+      console.log('Horizontal Ruler - Canvas Width:', canvasWidth, 'Full Width:', fullWidth, 'Canvas.width:', canvas.width)
+      
+      ctx.clearRect(0, 0, fullWidth, rulerSize.value)
       ctx.fillStyle = '#f8f9fa'
-      ctx.fillRect(0, 0, canvasWidth, rulerSize.value)
+      ctx.fillRect(0, 0, fullWidth, rulerSize.value)
       
       ctx.strokeStyle = '#dee2e6'
       ctx.fillStyle = '#495057'
@@ -149,7 +160,7 @@ export default {
       const bigStep = 50 * zoom
       const labelStep = 100 * zoom
 
-      for (let x = 0; x <= canvasWidth; x += step) {
+      for (let x = 0; x <= fullWidth; x += step) {
         const isBig = x % bigStep === 0
         const isLabel = x % labelStep === 0
         
@@ -167,7 +178,7 @@ export default {
       // Bottom border
       ctx.beginPath()
       ctx.moveTo(0, rulerSize.value - 0.5)
-      ctx.lineTo(canvasWidth, rulerSize.value - 0.5)
+      ctx.lineTo(fullWidth, rulerSize.value - 0.5)
       ctx.stroke()
     }
 
@@ -177,10 +188,14 @@ export default {
 
       const ctx = canvas.getContext('2d')
       const { canvasHeight, zoom } = props
+      const fullHeight = fullContainerHeight.value
       
-      ctx.clearRect(0, 0, rulerSize.value, canvasHeight)
+      // Debug logging
+      console.log('Vertical Ruler - Canvas Height:', canvasHeight, 'Full Height:', fullHeight, 'Canvas.height:', canvas.height)
+      
+      ctx.clearRect(0, 0, rulerSize.value, fullHeight)
       ctx.fillStyle = '#f8f9fa'
-      ctx.fillRect(0, 0, rulerSize.value, canvasHeight)
+      ctx.fillRect(0, 0, rulerSize.value, fullHeight)
       
       ctx.strokeStyle = '#dee2e6'
       ctx.fillStyle = '#495057'
@@ -192,7 +207,7 @@ export default {
       const bigStep = 50 * zoom
       const labelStep = 100 * zoom
 
-      for (let y = 0; y <= canvasHeight; y += step) {
+      for (let y = 0; y <= fullHeight; y += step) {
         const isBig = y % bigStep === 0
         const isLabel = y % labelStep === 0
         
@@ -214,7 +229,7 @@ export default {
       // Right border
       ctx.beginPath()
       ctx.moveTo(rulerSize.value - 0.5, 0)
-      ctx.lineTo(rulerSize.value - 0.5, canvasHeight)
+      ctx.lineTo(rulerSize.value - 0.5, fullHeight)
       ctx.stroke()
     }
 
@@ -490,6 +505,8 @@ export default {
       horizontalGuideLines,
       tempVerticalGuide,
       tempHorizontalGuide,
+      fullContainerWidth,
+      fullContainerHeight,
       handleHorizontalRulerMove,
       handleVerticalRulerMove,
       hideVerticalGuideLine,
@@ -509,6 +526,8 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 1000;
 }
@@ -522,6 +541,7 @@ export default {
 
 .horizontal-ruler {
   top: 0;
+  width: 100%;
   height: 20px;
   border-bottom: 1px solid #dee2e6;
 }
@@ -529,6 +549,7 @@ export default {
 .vertical-ruler {
   left: 0;
   width: 20px;
+  height: 100%;
   border-right: 1px solid #dee2e6;
 }
 

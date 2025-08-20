@@ -851,8 +851,8 @@
         <!-- Ruler Component -->
         <sketch-ruler
           v-if="showRulers"
-          :canvas-width="pageSize === 'a4' ? 794 : 816"
-          :canvas-height="pageSize === 'a4' ? 1123 : 1056"
+          :canvas-width="dynamicCanvasWidth"
+          :canvas-height="dynamicCanvasHeight"
           :zoom="zoom"
           :scroll-left="0"
           :scroll-top="0"
@@ -901,7 +901,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import DraggableElement from './DraggableElement.vue'
 import DataSourcePanel from './DataSourcePanel.vue'
 import SketchRuler from './SketchRuler.vue'
@@ -929,8 +929,45 @@ const selectedCell = ref(null)
 const showRulers = ref(true)
 const guideLines = ref({ vertical: [], horizontal: [] })
 const canvasContainer = ref(null)
+const canvasWidth = ref(800)
+const canvasHeight = ref(600)
 
 let elementIdCounter = 1
+
+// Computed properties for dynamic canvas dimensions
+const dynamicCanvasWidth = computed(() => {
+  if (canvasContainer.value) {
+    // Use full available width (container width or viewport width minus sidebar)
+    const containerWidth = canvasContainer.value.clientWidth || 0
+    const viewportWidth = (typeof window !== 'undefined' ? window.innerWidth - 320 : 1200)
+    // Ensure rulers cover full width - minimum 2000px for wide designs
+    const result = Math.max(containerWidth, viewportWidth, 2000)
+    console.log('Dynamic Canvas Width - Container:', containerWidth, 'Viewport:', viewportWidth, 'Result:', result)
+    return result
+  }
+  return 2000
+})
+
+const dynamicCanvasHeight = computed(() => {
+  if (canvasContainer.value) {
+    // Use full available height (container height or full viewport height)
+    const containerHeight = canvasContainer.value.clientHeight || 0
+    const viewportHeight = (typeof window !== 'undefined' ? window.innerHeight : 800)
+    // Ensure rulers cover full design area - minimum 1200px for proper coverage
+    const result = Math.max(containerHeight, viewportHeight, 1200)
+    console.log('Dynamic Canvas Height - Container:', containerHeight, 'Viewport:', viewportHeight, 'Result:', result)
+    return result
+  }
+  return 1200
+})
+
+// Function to update canvas dimensions
+const updateCanvasDimensions = () => {
+  if (canvasContainer.value) {
+    canvasWidth.value = canvasContainer.value.clientWidth
+    canvasHeight.value = canvasContainer.value.clientHeight
+  }
+}
 
 // Function to emit template updates
 const emitTemplateUpdate = () => {
@@ -1779,6 +1816,20 @@ watch(() => props.loadTemplate, (newTemplate) => {
       event.stopPropagation()
     }
 
+// Initialize canvas dimensions on mount
+onMounted(() => {
+  nextTick(() => {
+    updateCanvasDimensions()
+  })
+  
+  // Update dimensions when window resizes
+  window.addEventListener('resize', () => {
+    nextTick(() => {
+      updateCanvasDimensions()
+    })
+  })
+})
+
 // Expose methods to parent components
 defineExpose({
   loadTemplate,
@@ -1787,6 +1838,17 @@ defineExpose({
 </script>
 
 <style scoped>
+.canvas-container {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100vh;
+  min-width: 1200px;
+  min-height: 800px;
+  background: #ffffff;
+  overflow: auto;
+}
+
 .cell-container {
   position: relative;
   min-height: 32px;

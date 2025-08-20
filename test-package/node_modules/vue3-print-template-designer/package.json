@@ -1,7 +1,7 @@
 {
   "name": "vue3-print-template-designer",
-  "version": "1.0.1",
-  "description": "Vue 3 Print Template Designer with drag-and-drop functionality",
+  "version": "1.1.0",
+  "description": "Vue 3 Print Template Designer with drag-and-drop functionality and ruler guides",
   "main": "dist/vue3-print-template-designer.umd.js",
   "module": "dist/vue3-print-template-designer.es.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,12 @@
     "canvas",
     "pdf",
     "barcode",
-    "qrcode"
+    "qrcode",
+    "ruler",
+    "guides",
+    "alignment",
+    "photoshop",
+    "design-tools"
   ],
   "author": "Inayat Ullah",
   "license": "MIT",
