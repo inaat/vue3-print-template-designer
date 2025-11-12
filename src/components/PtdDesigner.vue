@@ -351,12 +351,69 @@
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
               <label class="form-label">Text Content</label>
-              <textarea 
-                class="form-control form-control-sm" 
+              <textarea
+                class="form-control form-control-sm"
                 rows="3"
                 v-model="selectedElement.content"
                 @input="updateElement"
+                ref="textContentArea"
               ></textarea>
+
+              <!-- Data Placeholder Buttons -->
+              <div class="mt-2">
+                <label class="form-label small text-muted">Insert Data Placeholder:</label>
+                <div class="btn-group-sm d-flex flex-wrap gap-1">
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{company_name}')"
+                    type="button"
+                  >
+                    Company
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{customer_name}')"
+                    type="button"
+                  >
+                    Customer
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{date}')"
+                    type="button"
+                  >
+                    Date
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{amount}')"
+                    type="button"
+                  >
+                    Amount
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{address}')"
+                    type="button"
+                  >
+                    Address
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{phone}')"
+                    type="button"
+                  >
+                    Phone
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="insertPlaceholder('{email}')"
+                    type="button"
+                  >
+                    Email
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
@@ -980,6 +1037,7 @@ const guideLines = ref({ vertical: [], horizontal: [] })
 const canvasContainer = ref(null)
 const canvasWidth = ref(800)
 const canvasHeight = ref(600)
+const textContentArea = ref(null)
 
 let elementIdCounter = 1
 
@@ -1722,9 +1780,9 @@ watch(() => props.loadTemplate, (newTemplate) => {
     // Add label to selected element
     const addLabelToElement = () => {
       if (!selectedElement.value) return
-      
+
       const baseElement = selectedElement.value
-      
+
       // Create a text label positioned at the center of the selected element
       const labelElement = {
         id: Date.now(),
@@ -1742,17 +1800,48 @@ watch(() => props.loadTemplate, (newTemplate) => {
         fontWeight: 'bold',
         textDirection: 'ltr'
       }
-      
+
       // Add the label element
       elements.value.push(labelElement)
-      
+
       // Automatically send it to front so it appears on top
       setTimeout(() => {
         selectedElement.value = labelElement
         sendToFront()
       }, 10)
-      
+
       emitTemplateUpdate()
+    }
+
+    // Insert placeholder into text content
+    const insertPlaceholder = (placeholder) => {
+      if (!selectedElement.value || !selectedElement.value.content) return
+
+      // Get the current cursor position or append to end
+      const textarea = textContentArea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const content = selectedElement.value.content
+
+        // Insert placeholder at cursor position
+        selectedElement.value.content =
+          content.substring(0, start) + placeholder + content.substring(end)
+
+        // Update element
+        updateElement()
+
+        // Set cursor position after inserted placeholder
+        nextTick(() => {
+          const newPosition = start + placeholder.length
+          textarea.setSelectionRange(newPosition, newPosition)
+          textarea.focus()
+        })
+      } else {
+        // If no textarea ref, just append to end
+        selectedElement.value.content += placeholder
+        updateElement()
+      }
     }
 
     // Handle guide lines changes from ruler

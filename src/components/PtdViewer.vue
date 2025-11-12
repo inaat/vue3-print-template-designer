@@ -213,7 +213,8 @@ export default {
       textAlign: element.textAlign || (element.textDirection === 'rtl' ? 'right' : 'left'),
       fontWeight: element.fontWeight || 'normal',
       fontStyle: element.fontStyle || 'normal',
-      textDecoration: element.textDecoration || 'none'
+      textDecoration: element.textDecoration || 'none',
+      whiteSpace: 'pre-wrap'
     })
 
     const getImageStyle = (element) => ({
@@ -339,28 +340,40 @@ export default {
       if (!canvasRef.value) return
 
       const printWindow = window.open('', '_blank')
+
+      // Get all loaded fonts from the parent document
+      const fontLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map(link => link.outerHTML)
+        .join('\n')
+
+      // Clone the canvas with deep cloning to preserve all content
       const canvasClone = canvasRef.value.cloneNode(true)
-      
+
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="UTF-8">
           <title>Print Template</title>
+          ${fontLinks}
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&family=Cairo:wght@200;300;400;500;600;700;900&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
           <style>
             * {
               -webkit-print-color-adjust: exact !important;
               color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
-            body { 
-              margin: 0 !important; 
-              padding: 0 !important; 
+            body {
+              margin: 0 !important;
+              padding: 0 !important;
               font-family: Arial, sans-serif;
               width: 100%;
               height: 100%;
             }
-            .canvas { 
-              box-shadow: none !important; 
+            .canvas {
+              box-shadow: none !important;
               margin: 0 !important;
               padding: 0 !important;
               display: block;
@@ -370,17 +383,36 @@ export default {
               width: 100% !important;
               height: 100% !important;
               transform: none !important;
+              background: white !important;
             }
-            .viewer-element { 
-              position: absolute !important; 
+            .viewer-element {
+              position: absolute !important;
               page-break-inside: avoid;
             }
-            .text-element { 
-              font-family: inherit; 
+            .text-element {
+              white-space: pre-wrap !important;
+              word-wrap: break-word !important;
+              overflow: visible !important;
+              display: flex !important;
+              align-items: flex-start !important;
             }
-            .image-element { 
-              max-width: 100%; 
-              max-height: 100%; 
+            .image-element {
+              max-width: 100%;
+              max-height: 100%;
+              object-fit: contain;
+            }
+            .line-element .line-shape {
+              position: absolute !important;
+            }
+            .rect-element .rect-shape,
+            .circle-element .circle-shape {
+              width: 100% !important;
+              height: 100% !important;
+            }
+            .table-element table {
+              width: 100% !important;
+              height: 100% !important;
+              border-collapse: collapse !important;
             }
             @page {
               margin: 0;
@@ -392,15 +424,15 @@ export default {
                 color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              body { 
-                margin: 0 !important; 
-                padding: 0 !important; 
+              body {
+                margin: 0 !important;
+                padding: 0 !important;
                 width: 210mm !important;
                 height: 297mm !important;
                 overflow: hidden !important;
               }
-              .canvas { 
-                margin: 0 !important; 
+              .canvas {
+                margin: 0 !important;
                 transform: none !important;
                 position: fixed !important;
                 top: 0 !important;
@@ -428,6 +460,11 @@ export default {
                 height: 100% !important;
                 box-sizing: border-box !important;
               }
+              .text-element {
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                overflow: visible !important;
+              }
             }
           </style>
         </head>
@@ -436,14 +473,15 @@ export default {
         </body>
         </html>
       `)
-      
+
       printWindow.document.close()
       printWindow.focus()
-      
+
+      // Wait longer for fonts to load before printing
       setTimeout(() => {
         printWindow.print()
         printWindow.close()
-      }, 250)
+      }, 500)
     }
 
     const handleImageError = (event) => {

@@ -51,11 +51,12 @@ export const generateHTMLContent = (template) => {
       font-style: ${element.fontStyle || 'normal'};
       text-decoration: ${element.textDecoration || 'none'};
       direction: ${element.textDirection || 'ltr'};
-      text-align: ${element.textDirection === 'rtl' ? 'right' : 'left'};
+      text-align: ${element.textAlign || (element.textDirection === 'rtl' ? 'right' : 'left')};
       display: flex;
       align-items: flex-start;
       padding: 4px;
-      word-wrap: break-word;`
+      word-wrap: break-word;
+      white-space: pre-wrap;`
     }
     
     if (element.type === 'line') {
