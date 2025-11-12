@@ -210,7 +210,7 @@ export default {
       wordWrap: 'break-word',
       overflow: 'hidden',
       direction: element.textDirection || 'ltr',
-      textAlign: element.textDirection === 'rtl' ? 'right' : 'left',
+      textAlign: element.textAlign || (element.textDirection === 'rtl' ? 'right' : 'left'),
       fontWeight: element.fontWeight || 'normal',
       fontStyle: element.fontStyle || 'normal',
       textDecoration: element.textDecoration || 'none'

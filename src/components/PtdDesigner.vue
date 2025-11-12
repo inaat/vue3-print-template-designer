@@ -269,7 +269,7 @@
               <span class="item-icon">I</span>
               Italic Text
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Underlined text', format: 'underline', fontSize: 14, textDecoration: 'underline' })"
@@ -277,6 +277,15 @@
             >
               <span class="item-icon">U</span>
               Underlined Text
+            </div>
+            <div
+              class="component-item"
+              draggable="true"
+              @dragstart="handleElementDragStart($event, { type: 'text', content: 'Multi-line text area\nwith preserved spacing', fontSize: 14, fontWeight: 'normal' })"
+              @click="addElementFromData({ type: 'text', content: 'Multi-line text area\nwith preserved spacing', fontSize: 14, fontWeight: 'normal' })"
+            >
+              <i class="bi bi-text-paragraph me-2"></i>
+              Textarea element
             </div>
           </div>
         </div>
@@ -375,17 +384,30 @@
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
               <label class="form-label">Color</label>
-              <input 
-                type="color" 
-                class="form-control form-control-color form-control-sm" 
+              <input
+                type="color"
+                class="form-control form-control-color form-control-sm"
                 v-model="selectedElement.color"
                 @input="updateElement"
               >
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
+              <label class="form-label">Text Alignment</label>
+              <select
+                class="form-select form-select-sm"
+                v-model="selectedElement.textAlign"
+                @change="updateElement"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+
+            <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
               <label class="form-label">Text Direction</label>
-              <select 
+              <select
                 class="form-select form-select-sm"
                 v-model="selectedElement.textDirection"
                 @change="updateElement"
@@ -804,19 +826,46 @@
             <div class="mb-3">
               <label class="form-label">Layer Order</label>
               <div class="btn-group w-100" role="group">
-                <button 
+                <button
                   class="btn btn-outline-secondary btn-sm"
                   @click="sendToBack"
                   title="Send to Back"
                 >
                   <i class="bi bi-arrow-down-square"></i> To Back
                 </button>
-                <button 
+                <button
                   class="btn btn-outline-secondary btn-sm"
                   @click="sendToFront"
                   title="Send to Front"
                 >
                   <i class="bi bi-arrow-up-square"></i> To Front
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Align to Canvas</label>
+              <div class="btn-group w-100" role="group">
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  @click="alignToCanvasLeft"
+                  title="Align Left"
+                >
+                  <i class="bi bi-align-start"></i> Left
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  @click="alignToCanvasCenter"
+                  title="Align Center"
+                >
+                  <i class="bi bi-align-center"></i> Center
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  @click="alignToCanvasRight"
+                  title="Align Right"
+                >
+                  <i class="bi bi-align-end"></i> Right
                 </button>
               </div>
             </div>
@@ -1639,7 +1688,7 @@ watch(() => props.loadTemplate, (newTemplate) => {
 
     const sendToFront = () => {
       if (!selectedElement.value) return
-      
+
       const elementIndex = elements.value.findIndex(el => el.id === selectedElement.value.id)
       if (elementIndex < elements.value.length - 1) {
         // Remove element from current position and add to end
@@ -1647,6 +1696,27 @@ watch(() => props.loadTemplate, (newTemplate) => {
         elements.value.push(element)
         emitTemplateUpdate()
       }
+    }
+
+    // Canvas alignment functions
+    const alignToCanvasLeft = () => {
+      if (!selectedElement.value) return
+      selectedElement.value.x = 0
+      updateElement()
+    }
+
+    const alignToCanvasCenter = () => {
+      if (!selectedElement.value) return
+      const canvasWidth = pageSize.value === 'a4' ? 794 : 816
+      selectedElement.value.x = (canvasWidth - selectedElement.value.width) / 2
+      updateElement()
+    }
+
+    const alignToCanvasRight = () => {
+      if (!selectedElement.value) return
+      const canvasWidth = pageSize.value === 'a4' ? 794 : 816
+      selectedElement.value.x = canvasWidth - selectedElement.value.width
+      updateElement()
     }
 
     // Add label to selected element

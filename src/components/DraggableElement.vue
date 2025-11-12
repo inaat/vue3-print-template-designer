@@ -177,7 +177,8 @@ export default {
       lineHeight: '1.2',
       padding: '4px',
       direction: props.element.textDirection || 'ltr',
-      textAlign: props.element.textDirection === 'rtl' ? 'right' : 'left'
+      textAlign: props.element.textAlign || (props.element.textDirection === 'rtl' ? 'right' : 'left'),
+      whiteSpace: 'pre-wrap'
     }))
 
     const imageStyle = computed(() => ({
@@ -407,6 +408,7 @@ export default {
   resize: none;
   overflow: hidden;
   box-sizing: border-box;
+  white-space: pre-wrap;
 }
 
 .line-element {
