@@ -44,18 +44,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.0",
-    "bootstrap": "^5.3.0",
     "@popperjs/core": "^2.11.8",
-    "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1",
-    "vue-draggable-plus": "^0.4.0",
+    "bootstrap": "^5.3.0",
     "fabric": "^5.3.0",
+    "html2canvas": "^1.4.1",
     "jsbarcode": "^3.11.5",
-    "qrcode": "^1.5.3",
+    "jspdf": "^2.5.1",
     "konva": "^9.2.0",
-    "vue-konva": "^3.0.2",
-    "pinia": "^2.1.7"
+    "pinia": "^2.1.7",
+    "qrcode": "^1.5.3",
+    "vue": "^3.4.0",
+    "vue-draggable-plus": "^0.4.0",
+    "vue-konva": "^3.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",

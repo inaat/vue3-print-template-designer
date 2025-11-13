@@ -82,12 +82,14 @@
         ref="designerRef"
         :placeholders="placeholders"
         :load-template="templateToLoad"
+        :locale="'ar'"
         @template-updated="handleTemplateUpdate"
       />
-      
+
       <ptd-viewer
         v-else-if="currentView === 'viewer'"
         :template="viewerTemplate"
+        :locale="'ar'"
       />
     </main>
 
@@ -548,56 +550,9 @@ const placeholders = ref([
       { type: 'placeholder', content: '{sick_days}', icon: '🏥', label: 'Sick Days' }
     ]
   },
-  {
-    name: '🏭 Organization Info',
-    items: [
-      { type: 'placeholder', content: '{company_name}', icon: '🏢', label: 'Company Name' },
-      { type: 'placeholder', content: '{company_address}', icon: '📍', label: 'Company Address' },
-      { type: 'placeholder', content: '{hr_contact}', icon: '👥', label: 'HR Contact' },
-      { type: 'placeholder', content: '{manager_name}', icon: '👨‍💼', label: 'Manager Name' },
-      { type: 'placeholder', content: '{company_phone}', icon: '📞', label: 'Company Phone' },
-      { type: 'placeholder', content: '{company_email}', icon: '📧', label: 'Company Email' }
-    ]
-  },
-  {
-    name: '📊 Performance Metrics',
-    items: [
-      { type: 'placeholder', content: '{review_date}', icon: '📅', label: 'Review Date' },
-      { type: 'placeholder', content: '{next_review}', icon: '⏭️', label: 'Next Review' },
-      { type: 'placeholder', content: '{performance_rating}', icon: '⭐', label: 'Performance Rating' },
-      { type: 'placeholder', content: '{goals}', icon: '🎯', label: 'Goals' },
-      { type: 'placeholder', content: '{training_completed}', icon: '🎓', label: 'Training Completed' },
-      { type: 'placeholder', content: '{certifications}', icon: '📜', label: 'Certifications' }
-    ]
-  },
-  {
-    name: '🖼️ Media Assets',
-    items: [
-      { type: 'image-placeholder', content: '{employee_image}', icon: '👤', label: '{employee_image}' },
-      { type: 'image-placeholder', content: '{{employee_image}}', icon: '👤', label: '{{employee_image}}' },
-      { type: 'image-placeholder', content: '{company_logo}', icon: '🏢', label: '{company_logo}' },
-      { type: 'image-placeholder', content: '{{company_logo}}', icon: '🏢', label: '{{company_logo}}' },
-      { type: 'image-placeholder', content: '{signature_image}', icon: '✍️', label: '{signature_image}' },
-      { type: 'image-placeholder', content: '{{signature_image}}', icon: '✍️', label: '{{signature_image}}' },
-      { type: 'image', content: 'upload', icon: '📁', label: 'Upload Image' },
-      { type: 'image', content: 'url', icon: '🌐', label: 'Image from URL' }
-    ]
-  },
-  {
-    name: '⚡ Quick Labels',
-    items: [
-      { type: 'text', content: 'EMPLOYEE RECORD', icon: '📄', label: '"EMPLOYEE RECORD" Title' },
-      { type: 'text', content: 'PERFORMANCE REVIEW', icon: '📋', label: '"PERFORMANCE REVIEW" Title' },
-      { type: 'text', content: 'JOB OFFER LETTER', icon: '💼', label: '"JOB OFFER LETTER" Title' },
-      { type: 'text', content: 'EMPLOYEE HANDBOOK', icon: '📚', label: '"EMPLOYEE HANDBOOK" Title' },
-      { type: 'text', content: 'Employee Details:', icon: '👤', label: '"Employee Details:" Label' },
-      { type: 'text', content: 'Department:', icon: '🏢', label: '"Department:" Label' },
-      { type: 'text', content: 'Salary:', icon: '💰', label: '"Salary:" Label' },
-      { type: 'text', content: 'HR Manager:', icon: '👥', label: '"HR Manager:" Label' },
-      { type: 'text', content: 'Date:', icon: '📅', label: '"Date:" Label' },
-      { type: 'text', content: 'Signature:', icon: '✍️', label: '"Signature:" Label' }
-    ]
-  }
+ 
+ 
+  
 ])
 </script>
 

@@ -3,42 +3,42 @@
     <div class="toolbar">
       <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
-          <h5 class="mb-0">Print Template Designer</h5>
+          <h5 class="mb-0">{{ t('title') }}</h5>
           <div class="btn-group" role="group">
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-outline-primary btn-sm"
               @click="addElement('text')"
             >
-              <i class="bi bi-type"></i> Text
+              <i class="bi bi-type"></i> {{ t('text') }}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-outline-primary btn-sm"
               @click="addElement('image')"
             >
-              <i class="bi bi-image"></i> Image
+              <i class="bi bi-image"></i> {{ t('image') }}
             </button>
             <label class="btn btn-outline-success btn-sm" for="imageUpload">
-              <i class="bi bi-upload"></i> Upload Image
+              <i class="bi bi-upload"></i> {{ t('uploadImage') }}
             </label>
-            <input 
-              type="file" 
-              id="imageUpload" 
-              accept="image/*" 
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
               @change="handleImageUpload"
               style="display: none;"
             >
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-outline-success btn-sm"
               @click="testAddElement"
             >
-              <i class="bi bi-plus"></i> Test ({{ elements.length }})
+              <i class="bi bi-plus"></i> {{ t('test') }} ({{ elements.length }})
             </button>
           </div>
         </div>
-        
+
         <div class="d-flex align-items-center gap-3">
           <div class="zoom-controls">
             <button class="btn btn-sm btn-outline-secondary" @click="zoomOut">
@@ -49,28 +49,28 @@
               <i class="bi bi-zoom-in"></i>
             </button>
           </div>
-          
+
           <div class="form-check me-3">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
+            <input
+              class="form-check-input"
+              type="checkbox"
               id="gridToggle"
               v-model="showGrid"
             >
             <label class="form-check-label" for="gridToggle">
-              Grid
+              {{ t('grid') }}
             </label>
           </div>
-          
+
           <div class="form-check">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
+            <input
+              class="form-check-input"
+              type="checkbox"
               id="rulersToggle"
               v-model="showRulers"
             >
             <label class="form-check-label" for="rulersToggle">
-              Rulers
+              {{ t('rulers') }}
             </label>
           </div>
           
@@ -92,10 +92,10 @@
               :class="{ active: sidebarTab === 'elements' }"
               @click="setSidebarTab('elements')"
               type="button"
-              title="Elements"
+              :title="t('elements')"
             >
               <i class="bi bi-collection"></i>
-              <span class="tab-label">Elements</span>
+              <span class="tab-label">{{ t('elements') }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -104,10 +104,10 @@
               :class="{ active: sidebarTab === 'data' }"
               @click="setSidebarTab('data')"
               type="button"
-              title="Data Sources"
+              :title="t('dataSources')"
             >
               <i class="bi bi-database"></i>
-              <span class="tab-label">Data</span>
+              <span class="tab-label">{{ t('data') }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -116,39 +116,39 @@
               :class="{ active: sidebarTab === 'properties' }"
               @click="setSidebarTab('properties')"
               type="button"
-              title="Properties"
+              :title="t('properties')"
             >
               <i class="bi bi-sliders"></i>
-              <span class="tab-label">Properties</span>
+              <span class="tab-label">{{ t('properties') }}</span>
             </button>
           </li>
         </ul>
 
         <!-- Elements Tab -->
         <div v-if="sidebarTab === 'elements'" class="sidebar-content p-3">
-          <h6>Basic Elements</h6>
+          <h6>{{ t('basicElements') }}</h6>
           <div class="component-library">
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'text', content: 'Sample Text', fontSize: 16, color: '#000000' })"
               @click="addElementFromData({ type: 'text', content: 'Sample Text', fontSize: 16, color: '#000000' })"
             >
               <i class="bi bi-type me-2"></i>
-              Text Field
+              {{ t('textField') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'image', src: 'https://via.placeholder.com/150x100' })"
               @click="addElementFromData({ type: 'image', src: 'https://via.placeholder.com/150x100' })"
             >
               <i class="bi bi-image me-2"></i>
-              Image Field
+              {{ t('imageField') }}
             </div>
             <label class="component-item" for="sidebarImageUpload" style="cursor: pointer;">
               <i class="bi bi-upload me-2"></i>
-              Upload Image
+              {{ t('uploadImage') }}
             </label>
             <input 
               type="file" 
@@ -157,117 +157,117 @@
               @change="handleImageUpload"
               style="display: none;"
             >
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'line', strokeColor: '#000000', strokeWidth: 2, strokeStyle: 'solid' })"
               @click="addElementFromData({ type: 'line', strokeColor: '#000000', strokeWidth: 2, strokeStyle: 'solid' })"
             >
               <i class="bi bi-slash-lg me-2"></i>
-              Line
+              {{ t('line') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'rect', fillColor: '#ffffff', strokeColor: '#000000', strokeWidth: 1, strokeStyle: 'solid' })"
               @click="addElementFromData({ type: 'rect', fillColor: '#ffffff', strokeColor: '#000000', strokeWidth: 1, strokeStyle: 'solid' })"
             >
               <i class="bi bi-square me-2"></i>
-              Rectangle
+              {{ t('rectangle') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'circle', fillColor: '#ffffff', strokeColor: '#000000', strokeWidth: 1, strokeStyle: 'solid' })"
               @click="addElementFromData({ type: 'circle', fillColor: '#ffffff', strokeColor: '#000000', strokeWidth: 1, strokeStyle: 'solid' })"
             >
               <i class="bi bi-circle me-2"></i>
-              Circle
+              {{ t('circle') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'table', rows: 3, cols: 3, borderStyle: 'solid', data: [['Cell 1', 'Cell 2', 'Cell 3'], ['Cell 4', 'Cell 5', 'Cell 6'], ['Cell 7', 'Cell 8', 'Cell 9']] })"
               @click="addElementFromData({ type: 'table', rows: 3, cols: 3, borderStyle: 'solid', data: [['Cell 1', 'Cell 2', 'Cell 3'], ['Cell 4', 'Cell 5', 'Cell 6'], ['Cell 7', 'Cell 8', 'Cell 9']] })"
             >
               <i class="bi bi-table me-2"></i>
-              Table
+              {{ t('table') }}
             </div>
           </div>
 
-          <h6 class="mt-4">✨ Text Styles</h6>
+          <h6 class="mt-4">{{ t('textStyles') }}</h6>
           <div class="component-library">
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Main Title', format: 'h1', fontSize: 32, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Main Title', format: 'h1', fontSize: 32, fontWeight: 'bold' })"
             >
               <span class="item-icon">H1</span>
-              Heading 1 (H1)
+              {{ t('heading1') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Section Title', format: 'h2', fontSize: 28, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Section Title', format: 'h2', fontSize: 28, fontWeight: 'bold' })"
             >
               <span class="item-icon">H2</span>
-              Heading 2 (H2)
+              {{ t('heading2') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Subsection Title', format: 'h3', fontSize: 24, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Subsection Title', format: 'h3', fontSize: 24, fontWeight: 'bold' })"
             >
               <span class="item-icon">H3</span>
-              Heading 3 (H3)
+              {{ t('heading3') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Minor Heading', format: 'h4', fontSize: 20, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Minor Heading', format: 'h4', fontSize: 20, fontWeight: 'bold' })"
             >
               <span class="item-icon">H4</span>
-              Heading 4 (H4)
+              {{ t('heading4') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Small Heading', format: 'h5', fontSize: 16, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Small Heading', format: 'h5', fontSize: 16, fontWeight: 'bold' })"
             >
               <span class="item-icon">H5</span>
-              Heading 5 (H5)
+              {{ t('heading5') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Regular paragraph text', format: 'p', fontSize: 14, fontWeight: 'normal' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Regular paragraph text', format: 'p', fontSize: 14, fontWeight: 'normal' })"
             >
               <span class="item-icon">P</span>
-              Paragraph (P)
+              {{ t('paragraph') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Important Note', format: 'bold', fontSize: 14, fontWeight: 'bold' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Important Note', format: 'bold', fontSize: 14, fontWeight: 'bold' })"
             >
               <span class="item-icon">B</span>
-              Bold Text
+              {{ t('boldText') }}
             </div>
-            <div 
+            <div
               class="component-item"
               draggable="true"
               @dragstart="handleElementDragStart($event, { type: 'formatted-text', content: 'Emphasized text', format: 'italic', fontSize: 14, fontStyle: 'italic' })"
               @click="addElementFromData({ type: 'formatted-text', content: 'Emphasized text', format: 'italic', fontSize: 14, fontStyle: 'italic' })"
             >
               <span class="item-icon">I</span>
-              Italic Text
+              {{ t('italicText') }}
             </div>
             <div
               class="component-item"
@@ -276,7 +276,7 @@
               @click="addElementFromData({ type: 'formatted-text', content: 'Underlined text', format: 'underline', fontSize: 14, textDecoration: 'underline' })"
             >
               <span class="item-icon">U</span>
-              Underlined Text
+              {{ t('underlinedText') }}
             </div>
             <div
               class="component-item"
@@ -285,7 +285,7 @@
               @click="addElementFromData({ type: 'text', content: 'Multi-line text area\nwith preserved spacing', fontSize: 14, fontWeight: 'normal' })"
             >
               <i class="bi bi-text-paragraph me-2"></i>
-              Textarea element
+              {{ t('textareaElement') }}
             </div>
           </div>
         </div>
@@ -295,14 +295,13 @@
           <data-source-panel :placeholders="placeholders" @add-element="addDataElement" />
         </div>
 
-
         <!-- Properties Tab -->
         <div v-if="sidebarTab === 'properties'" class="sidebar-content p-3">
           <div v-if="selectedElement" class="properties-panel">
-            <h6>Properties</h6>
+            <h6>{{ t('properties') }}</h6>
             
             <div class="mb-3">
-              <label class="form-label">Position</label>
+              <label class="form-label">{{ t('position') }}</label>
               <div class="row g-2">
                 <div class="col">
                   <input 
@@ -326,7 +325,7 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Size</label>
+              <label class="form-label">{{ t('size') }}</label>
               <div class="row g-2">
                 <div class="col">
                   <input 
@@ -350,7 +349,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Text Content</label>
+              <label class="form-label">{{ t('textContent') }}</label>
               <textarea
                 class="form-control form-control-sm"
                 rows="3"
@@ -361,63 +360,22 @@
 
               <!-- Data Placeholder Buttons -->
               <div class="mt-2">
-                <label class="form-label small text-muted">Insert Data Placeholder:</label>
+                <label class="form-label small text-muted">{{ t('insertDataPlaceholder') }}</label>
                 <div class="btn-group-sm d-flex flex-wrap gap-1">
                   <button
                     class="btn btn-outline-secondary btn-sm"
                     @click="insertPlaceholder('{company_name}')"
                     type="button"
                   >
-                    Company
+                    {{ t('company') }}
                   </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{customer_name}')"
-                    type="button"
-                  >
-                    Customer
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{date}')"
-                    type="button"
-                  >
-                    Date
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{amount}')"
-                    type="button"
-                  >
-                    Amount
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{address}')"
-                    type="button"
-                  >
-                    Address
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{phone}')"
-                    type="button"
-                  >
-                    Phone
-                  </button>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    @click="insertPlaceholder('{email}')"
-                    type="button"
-                  >
-                    Email
-                  </button>
+                 
                 </div>
               </div>
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Font Size</label>
+              <label class="form-label">{{ t('fontSize') }}</label>
               <input 
                 type="number" 
                 class="form-control form-control-sm" 
@@ -427,20 +385,20 @@
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Font Weight</label>
+              <label class="form-label">{{ t('fontWeight') }}</label>
               <select 
                 class="form-select form-select-sm"
                 v-model="selectedElement.fontWeight"
                 @change="updateElement"
               >
-                <option value="normal">Normal</option>
-                <option value="bold">Bold</option>
-                <option value="lighter">Light</option>
+                <option value="normal">{{ t('normal') }}</option>
+                <option value="bold">{{ t('bold') }}</option>
+                <option value="lighter">{{ t('light') }}</option>
               </select>
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Color</label>
+              <label class="form-label">{{ t('color') }}</label>
               <input
                 type="color"
                 class="form-control form-control-color form-control-sm"
@@ -450,38 +408,38 @@
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Text Alignment</label>
+              <label class="form-label">{{ t('textAlignment') }}</label>
               <select
                 class="form-select form-select-sm"
                 v-model="selectedElement.textAlign"
                 @change="updateElement"
               >
-                <option value="left">Left</option>
-                <option value="center">Center</option>
-                <option value="right">Right</option>
+                <option value="left">{{ t('left') }}</option>
+                <option value="center">{{ t('center') }}</option>
+                <option value="right">{{ t('right') }}</option>
               </select>
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Text Direction</label>
+              <label class="form-label">{{ t('textDirection') }}</label>
               <select
                 class="form-select form-select-sm"
                 v-model="selectedElement.textDirection"
                 @change="updateElement"
               >
-                <option value="ltr">Left to Right (LTR)</option>
-                <option value="rtl">Right to Left (RTL)</option>
+                <option value="ltr">{{ t('leftToRight') }}</option>
+                <option value="rtl">{{ t('rightToLeft') }}</option>
               </select>
             </div>
 
             <div v-if="selectedElement.type === 'text' || selectedElement.type === 'formatted-text'" class="mb-3">
-              <label class="form-label">Font Family</label>
+              <label class="form-label">{{ t('fontFamily') }}</label>
               <select 
                 class="form-select form-select-sm"
                 v-model="selectedElement.fontFamily"
                 @change="updateElement"
               >
-                <option value="inherit">Default</option>
+                <option value="inherit">{{ t('default') }}</option>
                 <option value="Arial, sans-serif">Arial</option>
                 <option value="'Helvetica Neue', sans-serif">Helvetica</option>
                 <option value="'Times New Roman', serif">Times New Roman</option>
@@ -494,7 +452,7 @@
                 <option value="Tahoma, sans-serif">Tahoma</option>
                 <option value="Verdana, sans-serif">Verdana</option>
                 <option value="'Segoe UI', sans-serif">Segoe UI</option>
-                <optgroup label="Arabic Fonts">
+                <optgroup :label="t('arabicFonts')">
                   <option value="Tajawal, sans-serif">Tajawal</option>
                   <option value="Cairo, sans-serif">Cairo</option>
                   <option value="'Noto Sans Arabic', sans-serif">Noto Sans Arabic</option>
@@ -505,7 +463,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'image'" class="mb-3">
-              <label class="form-label">Image</label>
+              <label class="form-label">{{ t('image') }}</label>
               <input 
                 type="file" 
                 class="form-control form-control-sm" 
@@ -515,7 +473,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'line'" class="mb-3">
-              <label class="form-label">Line Color</label>
+              <label class="form-label">{{ t('lineColor') }}</label>
               <input 
                 type="color" 
                 class="form-control form-control-color form-control-sm" 
@@ -525,7 +483,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'line'" class="mb-3">
-              <label class="form-label">Line Width</label>
+              <label class="form-label">{{ t('lineWidth') }}</label>
               <input 
                 type="number" 
                 class="form-control form-control-sm" 
@@ -536,20 +494,20 @@
             </div>
 
             <div v-if="selectedElement.type === 'line'" class="mb-3">
-              <label class="form-label">Line Style</label>
+              <label class="form-label">{{ t('lineStyle') }}</label>
               <select 
                 class="form-select form-select-sm"
                 v-model="selectedElement.strokeStyle"
                 @change="updateElement"
               >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
+                <option value="solid">{{ t('solid') }}</option>
+                <option value="dashed">{{ t('dashed') }}</option>
+                <option value="dotted">{{ t('dotted') }}</option>
               </select>
             </div>
 
             <div v-if="selectedElement.type === 'rect' || selectedElement.type === 'circle'" class="mb-3">
-              <label class="form-label">Fill Color</label>
+              <label class="form-label">{{ t('fillColor') }}</label>
               <input 
                 type="color" 
                 class="form-control form-control-color form-control-sm" 
@@ -559,7 +517,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'rect' || selectedElement.type === 'circle'" class="mb-3">
-              <label class="form-label">Border Color</label>
+              <label class="form-label">{{ t('borderColor') }}</label>
               <input 
                 type="color" 
                 class="form-control form-control-color form-control-sm" 
@@ -569,7 +527,7 @@
             </div>
 
             <div v-if="selectedElement.type === 'rect' || selectedElement.type === 'circle'" class="mb-3">
-              <label class="form-label">Border Width</label>
+              <label class="form-label">{{ t('borderWidth') }}</label>
               <input 
                 type="number" 
                 class="form-control form-control-sm" 
@@ -580,64 +538,64 @@
             </div>
 
             <div v-if="selectedElement.type === 'rect' || selectedElement.type === 'circle'" class="mb-3">
-              <label class="form-label">Border Style</label>
+              <label class="form-label">{{ t('borderStyle') }}</label>
               <select 
                 class="form-select form-select-sm"
                 v-model="selectedElement.strokeStyle"
                 @change="updateElement"
               >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
+                <option value="solid">{{ t('solid') }}</option>
+                <option value="dashed">{{ t('dashed') }}</option>
+                <option value="dotted">{{ t('dotted') }}</option>
               </select>
             </div>
 
             <!-- Table Properties -->
             <div v-if="selectedElement.type === 'table'">
-              <h6 class="mb-3">Table Structure</h6>
+              <h6 class="mb-3">{{ t('tableStructure') }}</h6>
               
               <div class="mb-3">
-                <label class="form-label">Rows: {{ selectedElement.rows }}</label>
+                <label class="form-label">{{ t('rows') }}: {{ selectedElement.rows }}</label>
                 <div class="btn-group w-100" role="group">
                   <button 
                     class="btn btn-outline-secondary btn-sm"
                     @click="removeTableRow"
                     :disabled="selectedElement.rows <= 1"
                   >
-                    <i class="bi bi-dash"></i> Remove Row
+                    <i class="bi bi-dash"></i> {{ t('removeRow') }}
                   </button>
                   <button 
                     class="btn btn-outline-primary btn-sm"
                     @click="addTableRow"
                   >
-                    <i class="bi bi-plus"></i> Add Row
+                    <i class="bi bi-plus"></i> {{ t('addRow') }}
                   </button>
                 </div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Columns: {{ selectedElement.cols }}</label>
+                <label class="form-label">{{ t('columns') }}: {{ selectedElement.cols }}</label>
                 <div class="btn-group w-100" role="group">
                   <button 
                     class="btn btn-outline-secondary btn-sm"
                     @click="removeTableColumn"
                     :disabled="selectedElement.cols <= 1"
                   >
-                    <i class="bi bi-dash"></i> Remove Column
+                    <i class="bi bi-dash"></i> {{ t('removeColumn') }}
                   </button>
                   <button 
                     class="btn btn-outline-primary btn-sm"
                     @click="addTableColumn"
                   >
-                    <i class="bi bi-plus"></i> Add Column
+                    <i class="bi bi-plus"></i> {{ t('addColumn') }}
                   </button>
                 </div>
               </div>
 
-              <h6 class="mb-3">Table Styling</h6>
+              <h6 class="mb-3">{{ t('tableStyling') }}</h6>
               
               <div class="mb-3">
-                <label class="form-label">Border Color</label>
+                <label class="form-label">{{ t('borderColor') }}</label>
                 <input 
                   type="color" 
                   class="form-control form-control-color form-control-sm" 
@@ -647,7 +605,7 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Border Width</label>
+                <label class="form-label">{{ t('borderWidth') }}</label>
                 <input 
                   type="number" 
                   class="form-control form-control-sm" 
@@ -658,20 +616,20 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Border Style</label>
+                <label class="form-label">{{ t('borderStyle') }}</label>
                 <select 
                   class="form-select form-select-sm"
                   v-model="selectedElement.borderStyle"
                   @change="updateElement"
                 >
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
+                  <option value="solid">{{ t('solid') }}</option>
+                  <option value="dashed">{{ t('dashed') }}</option>
+                  <option value="dotted">{{ t('dotted') }}</option>
                 </select>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Cell Padding</label>
+                <label class="form-label">{{ t('cellPadding') }}</label>
                 <input 
                   type="number" 
                   class="form-control form-control-sm" 
@@ -682,7 +640,7 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Background Color</label>
+                <label class="form-label">{{ t('backgroundColor') }}</label>
                 <input 
                   type="color" 
                   class="form-control form-control-color form-control-sm" 
@@ -692,7 +650,7 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Text Color</label>
+                <label class="form-label">{{ t('textColor') }}</label>
                 <input 
                   type="color" 
                   class="form-control form-control-color form-control-sm" 
@@ -702,7 +660,7 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Font Size</label>
+                <label class="form-label">{{ t('fontSize') }}</label>
                 <input 
                   type="number" 
                   class="form-control form-control-sm" 
@@ -714,38 +672,38 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Text Alignment</label>
+                <label class="form-label">{{ t('textAlignment') }}</label>
                 <select 
                   class="form-select form-select-sm"
                   v-model="selectedElement.textAlign"
                   @change="updateElement"
                 >
-                  <option value="left">Left</option>
-                  <option value="center">Center</option>
-                  <option value="right">Right</option>
+                  <option value="left">{{ t('left') }}</option>
+                  <option value="center">{{ t('center') }}</option>
+                  <option value="right">{{ t('right') }}</option>
                 </select>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Text Direction</label>
+                <label class="form-label">{{ t('textDirection') }}</label>
                 <select 
                   class="form-select form-select-sm"
                   v-model="selectedElement.textDirection"
                   @change="updateElement"
                 >
-                  <option value="ltr">Left to Right (LTR)</option>
-                  <option value="rtl">Right to Left (RTL)</option>
+                  <option value="ltr">{{ t('leftToRight') }}</option>
+                  <option value="rtl">{{ t('rightToLeft') }}</option>
                 </select>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Font Family</label>
+                <label class="form-label">{{ t('fontFamily') }}</label>
                 <select 
                   class="form-select form-select-sm"
                   v-model="selectedElement.fontFamily"
                   @change="updateElement"
                 >
-                  <option value="inherit">Default</option>
+                  <option value="inherit">{{ t('default') }}</option>
                   <option value="Arial, sans-serif">Arial</option>
                   <option value="'Helvetica Neue', sans-serif">Helvetica</option>
                   <option value="'Times New Roman', serif">Times New Roman</option>
@@ -758,7 +716,7 @@
                   <option value="Tahoma, sans-serif">Tahoma</option>
                   <option value="Verdana, sans-serif">Verdana</option>
                   <option value="'Segoe UI', sans-serif">Segoe UI</option>
-                  <optgroup label="Arabic Fonts">
+                  <optgroup :label="t('arabicFonts')">
                     <option value="Tajawal, sans-serif">Tajawal</option>
                     <option value="Cairo, sans-serif">Cairo</option>
                     <option value="'Noto Sans Arabic', sans-serif">Noto Sans Arabic</option>
@@ -769,19 +727,19 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Vertical Alignment</label>
+                <label class="form-label">{{ t('verticalAlignment') }}</label>
                 <select 
                   class="form-select form-select-sm"
                   v-model="selectedElement.verticalAlign"
                   @change="updateElement"
                 >
-                  <option value="top">Top</option>
-                  <option value="middle">Middle</option>
-                  <option value="bottom">Bottom</option>
+                  <option value="top">{{ t('top') }}</option>
+                  <option value="middle">{{ t('middle') }}</option>
+                  <option value="bottom">{{ t('bottom') }}</option>
                 </select>
               </div>
 
-              <h6 class="mb-3">Table Data & Cell Merge</h6>
+              <h6 class="mb-3">{{ t('tableDataCellMerge') }}</h6>
               
               <div class="table-editor mb-3">
                 <div 
@@ -821,7 +779,11 @@
               <!-- Cell Merge Controls -->
               <div v-if="selectedCell" class="mb-3">
                 <div class="alert alert-info py-2">
-                  <small><strong>Selected:</strong> Row {{ selectedCell.row + 1 }}, Column {{ selectedCell.col + 1 }}</small>
+                  <small>
+                    <strong>{{ t('selected') }}:</strong>
+                    {{ t('row') }} {{ selectedCell.row + 1 }},
+                    {{ t('column') }} {{ selectedCell.col + 1 }}
+                  </small>
                 </div>
                 
                 <div class="btn-group w-100 mb-2" role="group">
@@ -829,17 +791,17 @@
                     class="btn btn-outline-primary btn-sm"
                     @click="mergeCellRight"
                     :disabled="!canMergeRight()"
-                    title="Merge with right cell"
+                    :title="t('mergeRight')"
                   >
-                    <i class="bi bi-arrow-right"></i> Merge Right
+                    <i class="bi bi-arrow-right"></i> {{ t('mergeRight') }}
                   </button>
                   <button 
                     class="btn btn-outline-primary btn-sm"
                     @click="mergeCellDown"
                     :disabled="!canMergeDown()"
-                    title="Merge with cell below"
+                    :title="t('mergeDown')"
                   >
-                    <i class="bi bi-arrow-down"></i> Merge Down
+                    <i class="bi bi-arrow-down"></i> {{ t('mergeDown') }}
                   </button>
                 </div>
                 
@@ -848,16 +810,16 @@
                     class="btn btn-outline-secondary btn-sm"
                     @click="unmergeCells"
                     :disabled="!isCellMerged(selectedCell.row, selectedCell.col)"
-                    title="Unmerge cell"
+                    :title="t('unmerge')"
                   >
-                    <i class="bi bi-scissors"></i> Unmerge
+                    <i class="bi bi-scissors"></i> {{ t('unmerge') }}
                   </button>
                   <button 
                     class="btn btn-outline-secondary btn-sm"
                     @click="clearSelectedCell"
-                    title="Clear selection"
+                    :title="t('clearSelection')"
                   >
-                    <i class="bi bi-x"></i> Clear Selection
+                    <i class="bi bi-x"></i> {{ t('clearSelection') }}
                   </button>
                 </div>
               </div>
@@ -868,73 +830,73 @@
                     class="btn btn-outline-info btn-sm"
                     @click="fillTableWithSampleData"
                   >
-                    <i class="bi bi-table"></i> Sample Data
+                    <i class="bi bi-table"></i> {{ t('sampleData') }}
                   </button>
                   <button 
                     class="btn btn-outline-warning btn-sm"
                     @click="clearTableData"
                   >
-                    <i class="bi bi-eraser"></i> Clear All
+                    <i class="bi bi-eraser"></i> {{ t('clearAll') }}
                   </button>
                 </div>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Layer Order</label>
+              <label class="form-label">{{ t('layerOrder') }}</label>
               <div class="btn-group w-100" role="group">
                 <button
                   class="btn btn-outline-secondary btn-sm"
                   @click="sendToBack"
-                  title="Send to Back"
+                  :title="t('toBack')"
                 >
-                  <i class="bi bi-arrow-down-square"></i> To Back
+                  <i class="bi bi-arrow-down-square"></i> {{ t('toBack') }}
                 </button>
                 <button
                   class="btn btn-outline-secondary btn-sm"
                   @click="sendToFront"
-                  title="Send to Front"
+                  :title="t('toFront')"
                 >
-                  <i class="bi bi-arrow-up-square"></i> To Front
+                  <i class="bi bi-arrow-up-square"></i> {{ t('toFront') }}
                 </button>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Align to Canvas</label>
+              <label class="form-label">{{ t('alignToCanvas') }}</label>
               <div class="btn-group w-100" role="group">
                 <button
                   class="btn btn-outline-primary btn-sm"
                   @click="alignToCanvasLeft"
-                  title="Align Left"
+                  :title="t('left')"
                 >
-                  <i class="bi bi-align-start"></i> Left
+                  <i class="bi bi-align-start"></i> {{ t('left') }}
                 </button>
                 <button
                   class="btn btn-outline-primary btn-sm"
                   @click="alignToCanvasCenter"
-                  title="Align Center"
+                  :title="t('center')"
                 >
-                  <i class="bi bi-align-center"></i> Center
+                  <i class="bi bi-align-center"></i> {{ t('center') }}
                 </button>
                 <button
                   class="btn btn-outline-primary btn-sm"
                   @click="alignToCanvasRight"
-                  title="Align Right"
+                  :title="t('right')"
                 >
-                  <i class="bi bi-align-end"></i> Right
+                  <i class="bi bi-align-end"></i> {{ t('right') }}
                 </button>
               </div>
             </div>
 
             <div class="mb-3" v-if="selectedElement.type !== 'text'">
-              <label class="form-label">Add Label</label>
+              <label class="form-label">{{ t('addLabel') }}</label>
               <button 
                 class="btn btn-outline-success btn-sm w-100"
                 @click="addLabelToElement"
-                title="Add text label on top of this element"
+                :title="t('addLabel')"
               >
-                <i class="bi bi-type-bold"></i> Add Label
+                <i class="bi bi-type-bold"></i> {{ t('addLabel') }}
               </button>
             </div>
 
@@ -942,13 +904,13 @@
               class="btn btn-danger btn-sm w-100" 
               @click="deleteElement"
             >
-              <i class="bi bi-trash"></i> Delete
+              <i class="bi bi-trash"></i> {{ t('delete') }}
             </button>
           </div>
           
           <div v-else class="text-center text-muted">
             <i class="bi bi-cursor display-4"></i>
-            <p class="mt-2">Select an element to view properties</p>
+            <p class="mt-2">{{ t('selectElement') }}</p>
           </div>
         </div>
       </div>
@@ -964,8 +926,6 @@
           :scroll-top="0"
           @guide-lines-changed="handleGuideLinesChanged"
         />
-        
-        <!-- Guide Lines are now handled by SketchRuler component -->
         
         <!-- Debug info -->
         <div class="debug-info">
@@ -1006,11 +966,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import DraggableElement from './DraggableElement.vue'
 import DataSourcePanel from './DataSourcePanel.vue'
 import SketchRuler from './SketchRuler.vue'
+import { translations } from '../translations.js'
 
 const props = defineProps({
   placeholders: {
@@ -1020,6 +982,17 @@ const props = defineProps({
   loadTemplate: {
     type: Object,
     default: null
+  },
+  locale: {
+    type: String,
+    default: 'en'
+  }
+})
+
+// Get translation function
+const t = computed(() => {
+  return (key) => {
+    return translations[props.locale]?.[key] || translations.en[key] || key
   }
 })
 

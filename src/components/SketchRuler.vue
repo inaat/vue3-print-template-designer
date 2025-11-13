@@ -73,7 +73,7 @@
       <button
         class="btn btn-sm btn-outline-secondary"
         @click="clearAllGuides"
-        title="Clear all guides"
+        :title="t('clearAllGuides')"
       >
         <i class="bi bi-x"></i>
       </button>
@@ -83,10 +83,15 @@
 
 <script>
 import { ref, onMounted, watch, nextTick, computed } from 'vue'
+import { translations } from '../translations.js'
 
 export default {
   name: 'SketchRuler',
   props: {
+    locale: {
+      type: String,
+      default: 'en'
+    },
     canvasWidth: {
       type: Number,
       default: 1800
@@ -114,6 +119,13 @@ export default {
   },
   emits: ['guide-lines-changed'],
   setup(props, { emit }) {
+    // Get translation function
+    const t = computed(() => {
+      return (key) => {
+        return translations[props.locale]?.[key] || translations.en[key] || key
+      }
+    })
+
     const horizontalRulerRef = ref(null)
     const verticalRulerRef = ref(null)
     
@@ -498,6 +510,7 @@ export default {
     })
 
     return {
+      t,
       horizontalRulerRef,
       verticalRulerRef,
       rulerSize,

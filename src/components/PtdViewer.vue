@@ -3,27 +3,27 @@
     <div class="viewer-toolbar">
       <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
-          <h5 class="mb-0">Template Preview</h5>
+          <h5 class="mb-0">{{ t('templatePreview') }}</h5>
           <div class="btn-group" role="group">
-            <button 
+            <button
               class="btn btn-outline-primary btn-sm"
               @click="refreshPreview"
             >
-              <i class="bi bi-arrow-clockwise"></i> Refresh
+              <i class="bi bi-arrow-clockwise"></i> {{ t('refresh') }}
             </button>
-            <button 
+            <button
               class="btn btn-primary btn-sm"
               @click="exportToPDF"
               :disabled="isExporting"
             >
               <i class="bi bi-file-earmark-pdf"></i>
-              {{ isExporting ? 'Exporting...' : 'Export PDF' }}
+              {{ isExporting ? t('exporting') : t('exportPDF') }}
             </button>
-            <button 
+            <button
               class="btn btn-outline-secondary btn-sm"
               @click="printTemplate"
             >
-              <i class="bi bi-printer"></i> Print
+              <i class="bi bi-printer"></i> {{ t('print') }}
             </button>
           </div>
         </div>
@@ -40,8 +40,8 @@
           </div>
 
           <select class="form-select form-select-sm" v-model="previewMode" style="width: auto;">
-            <option value="preview">Preview</option>
-            <option value="print">Print View</option>
+            <option value="preview">{{ t('preview') }}</option>
+            <option value="print">{{ t('printView') }}</option>
           </select>
         </div>
       </div>
@@ -147,7 +147,7 @@
         <div v-else class="d-flex align-items-center justify-content-center h-100">
           <div class="text-center text-muted">
             <i class="bi bi-file-earmark display-1"></i>
-            <p class="mt-3">No template loaded</p>
+            <p class="mt-3">{{ t('noTemplateLoaded') }}</p>
           </div>
         </div>
       </div>
@@ -155,7 +155,7 @@
 
     <div v-if="isExporting" class="loading-spinner">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Exporting...</span>
+        <span class="visually-hidden">{{ t('exporting') }}</span>
       </div>
     </div>
   </div>
@@ -165,6 +165,7 @@
 import { ref, computed, nextTick } from 'vue'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import { translations } from '../translations.js'
 
 export default {
   name: 'PtdViewer',
@@ -172,9 +173,19 @@ export default {
     template: {
       type: Object,
       default: () => null
+    },
+    locale: {
+      type: String,
+      default: 'en'
     }
   },
   setup(props) {
+    // Get translation function
+    const t = computed(() => {
+      return (key) => {
+        return translations[props.locale]?.[key] || translations.en[key] || key
+      }
+    })
     const canvasRef = ref(null)
     const zoom = ref(1)
     const previewMode = ref('preview')
@@ -330,7 +341,7 @@ export default {
 
       } catch (error) {
         console.error('Error exporting PDF:', error)
-        alert('Error exporting PDF. Please try again.')
+        alert(t.value('errorExportingPDF'))
       } finally {
         isExporting.value = false
       }
@@ -354,7 +365,7 @@ export default {
         <html>
         <head>
           <meta charset="UTF-8">
-          <title>Print Template</title>
+          <title>${t.value('printTemplate')}</title>
           ${fontLinks}
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -489,6 +500,7 @@ export default {
     }
 
     return {
+      t,
       canvasRef,
       zoom,
       previewMode,
