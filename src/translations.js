@@ -119,7 +119,7 @@ export const translations = {
     clearAllGuides: 'Clear All Guides'
   },
   ar: {
-    // PtdDesigner translations
+  // PtdDesigner translations
     title: 'مصمم قوالب الطباعة',
     text: 'نص',
     image: 'صورة',
@@ -132,8 +132,8 @@ export const translations = {
     dataSources: 'مصادر البيانات',
     properties: 'الخصائص',
     basicElements: 'العناصر الأساسية',
-    textField: 'حقل نص',
-    imageField: 'حقل صورة',
+    textField: 'ادراج نص',
+    imageField: 'ادراج صورة',
     line: 'خط',
     rectangle: 'مستطيل',
     circle: 'دائرة',
@@ -200,7 +200,7 @@ export const translations = {
     cellPadding: 'حشوة الخلية',
     backgroundColor: 'لون الخلفية',
     textColor: 'لون النص',
-    verticalAlignment: 'محاذاة عمودية',
+    verticalAlignment: 'محاذاة رأسية',
     top: 'أعلى',
     middle: 'منتصف',
     bottom: 'أسفل',
